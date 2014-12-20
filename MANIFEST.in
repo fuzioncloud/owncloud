@@ -1,0 +1,2 @@
+include version LICENSE
+recursive-include bin *
