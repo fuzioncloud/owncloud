@@ -1,6 +1,8 @@
 #!/bin/bash
 
-INSTALLED_FILENAME=/var/www/installed
+OWNCLOUDPATH=/var/www/owncloud
+INSTALLED_FILENAME=${OWNCLOUDPATH}/installed
+
 if [ -e "${INSTALLED_FILENAME}" ]; then
   exit 0
 fi
@@ -8,7 +10,6 @@ fi
 APT_REPO_PREFIX="http://download.opensuse.org/repositories/isv:ownCloud:community"
 
 DATADIR=/data
-OWNCLOUDPATH=/var/www/owncloud
 
 OS_VERSION=$(lsb_release -sr)
 OS_ID=$(lsb_release -si)
