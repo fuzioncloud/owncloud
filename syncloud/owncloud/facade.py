@@ -2,10 +2,10 @@ import os
 from ConfigParser import ConfigParser
 
 from config import Config
-from owncloud import setup
 from configmanager import ConfigManager
 from access import Access
-from owncloud.syncloud.owncloud.https import Https
+from https import Https
+import setup
 
 
 default_config_path = '/usr/local/config'
