@@ -1,11 +1,14 @@
 #!/bin/bash
 
+INSTALLED_FILENAME=/var/www/installed
+if [ -e "${INSTALLED_FILENAME}" ]; then
+  exit 0
+fi
+
 APT_REPO_PREFIX="http://download.opensuse.org/repositories/isv:ownCloud:community"
 
 DATADIR=/data
 OWNCLOUDPATH=/var/www/owncloud
-
-OWNCLOUD_DEFAULT_PORT=80
 
 OS_VERSION=$(lsb_release -sr)
 OS_ID=$(lsb_release -si)
@@ -51,6 +54,19 @@ if grep -q inet /etc/group; then
     usermod -a -G inet www-data
 fi
 
+echo "owncloud dir:"
+ls -la ${OWNCLOUDPATH}
+
+echo "owncloud apps"
+ls -la ${OWNCLOUDPATH}/apps/
+
+# disable some owncloud apps
+sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/contacts/appinfo/info.xml
+sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/calendar/appinfo/info.xml
+sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/updater/appinfo/info.xml
+
+
+# Apache configuration
 if [[ ${OS_ID} = "Ubuntu" ]]; then
 
 cat <<APACHE > /etc/apache2/sites-available/owncloud.conf
@@ -75,20 +91,6 @@ fi
 
 a2ensite owncloud
 
-echo "owncloud dir:"
-ls -la ${OWNCLOUDPATH}
-
-echo "owncloud apps"
-ls -la ${OWNCLOUDPATH}/apps/
-
-# disable some owncloud apps
-sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/contacts/appinfo/info.xml
-sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/calendar/appinfo/info.xml
-sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/updater/appinfo/info.xml
-
-# setup crontab task
-su -c "echo \"*/1 * * * * php -f ${OWNCLOUDPATH}/cron.php\" | crontab -" www-data
-
 dpkg -l | grep apache
 service apache2 status
 service apache2 restart
@@ -98,6 +100,11 @@ tail -100 /var/log/apache2/error.log
 
 echo "apache default page:"
 curl localhost
+
+# setup crontab task
+su -c "echo \"*/1 * * * * php -f ${OWNCLOUDPATH}/cron.php\" | crontab -" www-data
+
+echo "Installed successfully" > ${INSTALLED_FILENAME}
 
 #hiding real exit code as restart is not fully working in chroot
 exit 0
