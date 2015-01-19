@@ -14,9 +14,6 @@ DATADIR=/data
 OS_VERSION=$(lsb_release -sr)
 OS_ID=$(lsb_release -si)
 
-# tools for owncloud
-apt-get -y install php-apc curl libapache2-mod-php5
-
 # install mySQL (set root user password to root)
 echo "mysql-server-5.5 mysql-server/root_password password root" | debconf-set-selections
 echo "mysql-server-5.5 mysql-server/root_password_again password root" | debconf-set-selections
@@ -66,35 +63,10 @@ sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/contacts/appinfo/info.xml
 sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/calendar/appinfo/info.xml
 sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/updater/appinfo/info.xml
 
-
-# Apache configuration
-if [[ ${OS_ID} = "Ubuntu" ]]; then
-
-cat <<APACHE > /etc/apache2/sites-available/owncloud.conf
-<Directory /var/www/owncloud>
-  AllowOverride All
-</Directory>
-APACHE
-
-  # apache 2.2 fix
-  ln -s /etc/apache2/sites-available/owncloud.conf /etc/apache2/sites-available/owncloud
-
-  echo "apache sites available:"
-  ls -la /etc/apache2/sites-available/
-  echo "apache sites enabled:"
-  ls -la /etc/apache2/sites-enabled/
-
-fi
-
-if [[ ${OS_ID} = "Debian" ]]; then
-  echo "Alias /owncloud ${OWNCLOUDPATH}" > /etc/apache2/sites-available/owncloud.conf
-fi
-
-a2ensite owncloud
-
 dpkg -l | grep apache
 service apache2 status
-service apache2 restart
+
+syncloud-apache add_http_site owncloud /usr/local/owncloud.conf
 
 echo "apache error log:"
 tail -100 /var/log/apache2/error.log

@@ -1,14 +1,17 @@
 import os
 from ConfigParser import ConfigParser
+from os.path import join
+from syncloud.apache.facade import AoacheFacade
+from syncloud.tools.facade import Facade
 
 from config import Config
 from configmanager import ConfigManager
 from access import Access
-from https import Https
 import setup
 
 
-default_config_path = '/usr/local/config'
+tools_facade = Facade()
+default_config_path = join(tools_facade.usr_local_dir(), 'syncloud-owncloud', 'config')
 
 
 class OwncloudControl:
@@ -67,10 +70,13 @@ def get_control(insider, config_path=default_config_path):
     service_type_https = parser.get('owncloud', 'service_type_https')
     url = parser.get('owncloud', 'url')
     config_file = parser.get('owncloud', 'config_file')
+    site_config_file = parser.get('owncloud', 'site_config_file')
+    site_name = parser.get('owncloud', 'site_name')
 
-    config = Config(service_name, port_http, service_type_http, port_https, service_type_https, url, config_file)
+    config = Config(service_name, port_http, service_type_http, port_https, service_type_https, url, config_file,
+                    site_config_file, site_name, config_path)
+
     config_manager = ConfigManager(config.config_file)
-    https = Https(config)
-    access = Access(config, insider, config_manager, https)
+    access = Access(config, insider, config_manager, AoacheFacade())
 
     return OwncloudControl(config, insider, access, config_manager)
