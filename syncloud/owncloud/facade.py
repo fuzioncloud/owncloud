@@ -1,7 +1,7 @@
 import os
 from ConfigParser import ConfigParser
 from os.path import join
-from syncloud.apache.facade import AoacheFacade
+from syncloud.apache.facade import ApacheFacade
 from syncloud.tools.facade import Facade
 
 from config import Config
@@ -77,6 +77,6 @@ def get_control(insider, config_path=default_config_path):
                     site_config_file, site_name, config_path)
 
     config_manager = ConfigManager(config.config_file)
-    access = Access(config, insider, config_manager, AoacheFacade())
+    access = Access(config, insider, config_manager, ApacheFacade())
 
     return OwncloudControl(config, insider, access, config_manager)
