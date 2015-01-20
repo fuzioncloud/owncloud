@@ -16,6 +16,7 @@ class Access:
     def https_off(self):
         self.apache.remove_https_site(self.config.site_name)
         self.apache.add_http_site(self.config.site_name, self.site_config_file_full)
+        self.apache.restart()
 
         self.set_port('http', self.config.service_type_http, self.config.port_http)
         info = self.insider.service_info(self.config.service_name)
@@ -24,6 +25,7 @@ class Access:
     def https_on(self):
         self.apache.remove_http_site(self.config.site_name)
         self.apache.add_https_site(self.config.site_name, self.site_config_file_full)
+        self.apache.restart()
 
         self.set_port('https', self.config.service_type_https, self.config.port_https)
         info = self.insider.service_info(self.config.service_name)

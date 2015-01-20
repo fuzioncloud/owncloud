@@ -67,6 +67,7 @@ dpkg -l | grep apache
 service apache2 status
 
 syncloud-apache add_http_site owncloud /usr/local/owncloud.conf
+syncloud-apache restart
 
 echo "apache error log:"
 tail -100 /var/log/apache2/error.log
