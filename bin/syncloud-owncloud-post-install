@@ -66,8 +66,7 @@ sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/updater/appinfo/info.xml
 dpkg -l | grep apache
 service apache2 status
 
-syncloud-apache add_http_site owncloud /usr/local/owncloud.conf
-syncloud-apache restart
+owncloud-ctl https_off
 
 echo "apache error log:"
 tail -100 /var/log/apache2/error.log
