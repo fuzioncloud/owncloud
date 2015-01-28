@@ -15,4 +15,4 @@ deploy:
 after_deploy:
 - pip install travis-tools
 - version-increment version
-- universal-version-push version syncloud-build ${TRAVIS_REPO_SLUG} GH_TOKEN TRAVIS_BRANCH "Travis build [skip ci]" > /dev/null 2>&1
+- universal-version-push version syncloud-build ${TRAVIS_REPO_SLUG} GH_TOKEN TRAVIS_BRANCH "Travis build [skip ci]"
