@@ -2,6 +2,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 import logging
+from syncloud.app import logger
 
 log = logging.getLogger()
 
@@ -34,9 +35,12 @@ def finish(owncloud_url, login, password):
 
 
 def is_finished(owncloud_url):
+    log = logger.get_logger('owncloud.setup.is_finished')
     index_url = get_index_url(owncloud_url)
     try:
         response = requests.get(index_url, verify=False)
+        log.debug('{0} response'.format(index_url))
+        log.debug(response)
         if response.status_code == 400:
             raise Exception("ownCloud is not trusting you to access {}".format(index_url))
 
