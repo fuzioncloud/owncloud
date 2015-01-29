@@ -66,7 +66,14 @@ sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/updater/appinfo/info.xml
 dpkg -l | grep apache
 service apache2 status
 
-owncloud-ctl https_off
+echo "apache configs"
+ls -la /etc/apache2/conf.http.d
+
+echo "enabling owncloud http site"
+owncloud-ctl --debug https_off
+
+echo "apache configs"
+ls -la /etc/apache2/conf.http.d
 
 echo "apache error log:"
 tail -100 /var/log/apache2/error.log
