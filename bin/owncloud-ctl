@@ -28,6 +28,7 @@ def create_args_parser():
     subparsers.add_parser('https_on', help="enable https")
     subparsers.add_parser('https_off', help="disable https")
     subparsers.add_parser('url', help="prints external url by service name")
+    subparsers.add_parser('init_apache', help="initial apache http site setup for web activation")
 
     subparsers.add_parser('verify', help="verify finish status")
 

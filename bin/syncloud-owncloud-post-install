@@ -70,7 +70,7 @@ echo "apache configs"
 ls -la /etc/apache2/conf.http.d
 
 echo "enabling owncloud http site"
-owncloud-ctl --debug https_off
+owncloud-ctl --debug init_apache
 
 echo "apache configs"
 ls -la /etc/apache2/conf.http.d
