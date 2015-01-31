@@ -1,7 +1,7 @@
 language: python
 env:
   global:
-  - secure: DRUP/7WCSPj7o73WF9dsmUCU+K+F1mVsq8XkDOHMvTkR82rjYNqIZqs5CWQHvJ1CT1YDVMXTAAdTOnuozH8BfyYGH7dP5LcbGuUtcYqKwVmHTX0eERHUpDYo5XxJdSG4C20MaqnDvhHZonM573JhJzKLTlVEEbrF8e42MniEzKw=
+    secure: BtBlaMXw1N7KgnNTapanGyLSurDtWzxk6OmQhX6eddif7MVd1wLJCqDeAMt4xoh3/szP51aplgqjOcSEkjAWTLefyGwB/MHuRjW3uopNOL8Zhd2scHlSaha3TtoJhMM5RLM+ufvoBLf4c4LYCLjdwrobsAbAsqdREhaKc3ETjAQ=
 install:
 - pip install -e .
 - pip install -r dev_requirements.txt
