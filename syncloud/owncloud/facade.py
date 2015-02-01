@@ -24,9 +24,12 @@ class OwncloudControl:
     def finish(self, login, password, host, protocol):
         owncloud_url = 'http://{}:{}/{}'.format(host, self.config.port_http, self.config.url)
         setup.finish(owncloud_url, login, password)
-        self.reconfigure(protocol)
+        self._enable_www(protocol)
 
-    def reconfigure(self, protocol):
+    def reconfigure(self):
+        self._enable_www('http')
+
+    def _enable_www(self, protocol):
         protocol = protocol.lower()
         if protocol == 'https':
             self.access.https_on()

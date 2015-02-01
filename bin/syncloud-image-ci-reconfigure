@@ -5,4 +5,4 @@ from syncloud.owncloud.facade import reconfigure
 
 logger.init(logging.DEBUG, True)
 
-reconfigure('http')
+reconfigure()
