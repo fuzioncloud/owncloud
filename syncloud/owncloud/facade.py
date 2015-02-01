@@ -24,6 +24,9 @@ class OwncloudControl:
     def finish(self, login, password, host, protocol):
         owncloud_url = 'http://{}:{}/{}'.format(host, self.config.port_http, self.config.url)
         setup.finish(owncloud_url, login, password)
+        self.reconfigure(protocol)
+
+    def reconfigure(self, protocol):
         protocol = protocol.lower()
         if protocol == 'https':
             self.access.https_on()
@@ -39,8 +42,8 @@ class OwncloudControl:
     def https_off(self):
         return self.access.https_off()
 
-    def init_apache(self):
-        return self.access.init_apache()
+    # def init_apache(self):
+    #     return self.access.init_apache()
 
     def _get_url(self, info):
         url = '{0}://{1}:{2}'.format(info.service.protocol, info.external_host, info.external_port)

@@ -31,6 +31,6 @@ class Access:
         info = self.insider.service_info(self.config.service_name)
         self.config_manager.trusted(info.external_host, info.external_port)
 
-    def init_apache(self):
-        self.apache.add_http_site(self.config.site_name, self.site_config_file_full)
-        self.apache.restart()
+    # def init_apache(self):
+    #     self.apache.add_http_site(self.config.site_name, self.site_config_file_full)
+    #     self.apache.restart()
