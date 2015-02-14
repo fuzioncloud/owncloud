@@ -35,6 +35,8 @@ else
     OWNCLOUD_REPO=${APT_REPO_PREFIX}/xUbuntu_${OS_VERSION}
 fi
 
+echo "Using apt repo: $OWNCLOUD_REPO"
+
 wget --no-check-certificate -qO - ${OWNCLOUD_REPO}/Release.key | apt-key add -
 echo "deb ${OWNCLOUD_REPO}/ /" > /etc/apt/sources.list.d/owncloud.list
 
