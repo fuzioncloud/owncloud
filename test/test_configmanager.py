@@ -22,6 +22,21 @@ class TestConfigManager(unittest.TestCase):
 
         self.assertEquals(read_file('config_trusted_domains_output.php'), config.read())
 
+    def test_trusted_http_no_port_config(self):
+
+        config = ConfigManager(temp_config_file)
+        config.write(read_file('config_trusted_domains_no_port_input.php'))
+        config.trusted('test.domain', 80)
+
+        self.assertEquals(read_file('config_trusted_domains_no_port_output.php'), config.read())
+
+    def test_trusted_https_no_port_config(self):
+
+        config = ConfigManager(temp_config_file)
+        config.write(read_file('config_trusted_domains_no_port_input.php'))
+        config.trusted('test.domain', 443)
+
+        self.assertEquals(read_file('config_trusted_domains_no_port_output.php'), config.read())
     def test_trusted_config_multi_run_ho_harm(self):
 
         config = ConfigManager(temp_config_file)

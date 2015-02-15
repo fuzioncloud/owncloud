@@ -30,7 +30,13 @@ class ConfigManager:
         self.owncloud_config = owncloud_config
 
     def trusted(self, domain, port):
-        self.write(convert_trusted_configuration(self.read(), "{0}:{1}".format(domain, port)))
+
+        if port in [80, 443]:
+            optional_port = ""
+        else:
+            optional_port = ":{0}".format(port)
+
+        self.write(convert_trusted_configuration(self.read(), "{0}{1}".format(domain, optional_port)))
 
     def overwrite_webroot(self):
         self.write(overwrite_webroot(self.read()))
