@@ -45,6 +45,9 @@ def is_finished(owncloud_url):
             raise Exception("ownCloud is not trusting you to access {}".format(index_url))
 
         if response.status_code != 200:
+            soup = BeautifulSoup(response.text)
+            error = soup.find('li', class_='error')
+            log.error(error)
             raise Exception("ownCloud is not available at {}".format(index_url))
 
         return "Finish setup" not in response.text

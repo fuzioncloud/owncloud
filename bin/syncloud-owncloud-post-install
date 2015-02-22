@@ -57,12 +57,13 @@ fi
 echo "owncloud dir:"
 ls -la ${OWNCLOUDPATH}
 
-echo "owncloud apps"
+echo "fixing apps permissions"
+chown -R www-data. /var/www/owncloud/apps
 ls -la ${OWNCLOUDPATH}/apps/
 
 # disable some owncloud apps
-sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/contacts/appinfo/info.xml
-sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/calendar/appinfo/info.xml
+#sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/contacts/appinfo/info.xml
+#sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/calendar/appinfo/info.xml
 sed -i -e "/<default_enable\/>/d" ${OWNCLOUDPATH}/apps/updater/appinfo/info.xml
 
 dpkg -l | grep apache
