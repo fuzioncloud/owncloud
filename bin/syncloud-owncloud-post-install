@@ -87,6 +87,8 @@ curl localhost
 # setup crontab task
 su -c "echo \"*/1 * * * * php -f ${OWNCLOUDPATH}/cron.php\" | crontab -" www-data
 
+sed -i 's/[;]default_charset.*=.*/default_charset = "UTF-8"/g' /etc/php5/apache2/php.ini
+
 echo "Installed successfully" > ${INSTALLED_FILENAME}
 
 #hiding real exit code as restart is not fully working in chroot
