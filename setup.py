@@ -3,10 +3,8 @@ from os.path import join, dirname
 
 requirements = [
     'requests',
-    'beautifulsoup4==4.3.2',
-    'syncloud-app',
-    'syncloud-insider',
-    'syncloud-apache'
+    'beautifulsoup4',
+    'syncloud-platform'
 ]
 
 version = open(join(dirname(__file__), 'version')).read().strip()
