@@ -14,11 +14,17 @@ DATADIR=/data
 OS_VERSION=$(lsb_release -sr)
 OS_ID=$(lsb_release -si)
 
-# install mySQL (set root user password to root)
+echo "install mySQL (set root user password to root)"
 echo "mysql-server-5.5 mysql-server/root_password password root" | debconf-set-selections
 echo "mysql-server-5.5 mysql-server/root_password_again password root" | debconf-set-selections
 apt-get -y install mysql-server-5.5 unzip
 
+echo "fixing mysql"
+if [ -f /etc/mysql/debian.cnf ]; then
+    cat /etc/mysql/debian.cnf
+    echo "first line is corrupted on Cubian"
+    sed -i '/fgrep/f' /etc/mysql/debian.cnf
+fi
 if grep -q inet /etc/group; then
     usermod -a -G inet mysql
 fi
@@ -79,7 +85,7 @@ tail -100 /var/log/apache2/error.log
 echo "apache default page:"
 curl localhost
 
-# setup crontab task
+echo "setup crontab task"
 su -c "echo \"*/1 * * * * php -f ${OWNCLOUDPATH}/cron.php\" | crontab -" www-data
 
 sed -i 's/[;]default_charset.*=.*/default_charset = "UTF-8"/g' /etc/php5/apache2/php.ini
