@@ -23,7 +23,7 @@ echo "fixing mysql"
 if [ -f /etc/mysql/debian.cnf ]; then
     cat /etc/mysql/debian.cnf
     echo "first line is corrupted on Cubian"
-    sed -i '/fgrep/f' /etc/mysql/debian.cnf
+    sed -i '/fgrep/d' /etc/mysql/debian.cnf
 fi
 if grep -q inet /etc/group; then
     usermod -a -G inet mysql
