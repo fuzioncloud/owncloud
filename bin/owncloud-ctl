@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     console = True if args.debug else False
     level = logging.DEBUG if args.debug else logging.INFO
-    logger.init(level, console, '/tmp/syncloud-owncloud-ctl.log')
+    logger.init(level, console, '/var/log/syncloud-owncloud-ctl.log')
 
     control = facade.get_control(get_insider())
     main.execute(control, args)

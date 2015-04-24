@@ -22,12 +22,15 @@ class OwncloudControl:
         self.access = access
 
     def finish(self, login, password, host, protocol):
+
+        # Activation needs default http owncloud site
+        self.access.enable_http_web()
+
         owncloud_url = 'http://{}:{}/{}'.format(host, self.config.port_http, self.config.url)
         setup.finish(owncloud_url, login, password)
-        self.access.mode(protocol.lower())
 
-    def reconfigure(self):
-        self.access.enable_http_web()
+        # Now we can switch to
+        self.access.mode(protocol.lower())
 
     def https_on(self):
         self.access.mode('https')
