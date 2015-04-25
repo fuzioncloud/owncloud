@@ -14,7 +14,7 @@ def finish(owncloud_url, login, password):
 
     index_url = get_index_url(owncloud_url)
 
-    log.debug("will finish setup using: %s", index_url)
+    log.info("will finish setup using: %s", index_url)
 
     response = requests.post(index_url,
                              data={
