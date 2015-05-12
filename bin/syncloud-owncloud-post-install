@@ -1,23 +1,18 @@
 #!/bin/bash
 
-OWNCLOUDPATH=/var/www/owncloud
+OWNCLOUDPATH=/opt/owncloud
 INSTALLED_FILENAME=${OWNCLOUDPATH}/installed
 
 if [ -e "${INSTALLED_FILENAME}" ]; then
   exit 0
 fi
 
-APT_REPO_PREFIX="http://download.opensuse.org/repositories/isv:ownCloud:community"
-
 DATADIR=/data
-
-OS_VERSION=$(lsb_release -sr)
-OS_ID=$(lsb_release -si)
 
 echo "install mySQL (set root user password to root)"
 echo "mysql-server-5.5 mysql-server/root_password password root" | debconf-set-selections
 echo "mysql-server-5.5 mysql-server/root_password_again password root" | debconf-set-selections
-apt-get -y install mysql-server-5.5 unzip
+apt-get -y install mysql-server-5.5 unzip php5-gd php5-json php5-mysql php5-curl php5-intl php5-mcrypt php5-imagick bzip2
 
 echo "fixing mysql"
 if [ -f /etc/mysql/debian.cnf ]; then
@@ -35,26 +30,8 @@ CREATE DATABASE IF NOT EXISTS owncloud;
 GRANT ALL PRIVILEGES ON owncloud.* TO 'owncloud'@'localhost' IDENTIFIED BY 'owncloud';
 EOFMYSQL
 
-if [[ ${OS_ID} = "Debian" ]]; then
-    OWNCLOUD_REPO=${APT_REPO_PREFIX}/Debian_7.0
-else
-    OWNCLOUD_REPO=${APT_REPO_PREFIX}/xUbuntu_${OS_VERSION}
-fi
-
-echo "Using apt repo: $OWNCLOUD_REPO"
-
-wget --no-check-certificate -qO - ${OWNCLOUD_REPO}/Release.key | apt-key add -
-echo "deb ${OWNCLOUD_REPO}/ /" > /etc/apt/sources.list.d/owncloud.list
-
-cat <<APTPREF > /etc/apt/preferences
-Package: *
-Pin: origin download.opensuse.org
-Pin-Priority: 610
-APTPREF
-
-apt-get update
-apt-get -y --no-install-recommends install owncloud
-
+wget http://apps.syncloud.org/owncloud-8.0.3.tar.bz2
+tar xjvf owncloud-8.0.3.tar.bz2 -C /opt
 if grep -q inet /etc/group; then
     # add www-data user to inet group
     usermod -a -G inet www-data
@@ -64,7 +41,7 @@ echo "owncloud dir:"
 ls -la ${OWNCLOUDPATH}
 
 echo "fixing apps permissions"
-chown -R www-data. /var/www/owncloud/apps
+chown -R www-data. /opt/owncloud/apps
 ls -la ${OWNCLOUDPATH}/apps/
 
 echo "setup crontab task"
