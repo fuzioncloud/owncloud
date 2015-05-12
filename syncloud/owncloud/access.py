@@ -12,7 +12,9 @@ class Access:
     def update_insider(self, protocol, service_type, port):
         self.insider.remove_service(self.config.service_name)
         self.insider.add_service(self.config.service_name, protocol, service_type, port, self.config.url)
+        self.update_trusted_info()
 
+    def update_trusted_info(self):
         info = self.insider.service_info(self.config.service_name)
         self.config_manager.trusted(info.external_host, info.external_port)
 

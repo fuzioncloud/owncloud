@@ -28,8 +28,7 @@ def create_args_parser():
     subparsers.add_parser('https_on', help="enable https")
     subparsers.add_parser('https_off', help="disable https")
     subparsers.add_parser('url', help="prints external url by service name")
-    subparsers.add_parser('reconfigure', help="apache http site setup")
-
+    subparsers.add_parser('reconfigure', help="update trusted config")
     subparsers.add_parser('verify', help="verify finish status")
 
     return parser

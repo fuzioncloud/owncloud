@@ -55,6 +55,9 @@ class OwncloudControl:
         else:
             return "finished"
 
+    def reconfigure(self):
+        self.access.update_trusted_info()
+
 
 def get_control(insider, config_path=default_config_path):
     config_filename = os.path.join(config_path, 'owncloud-ctl.cfg')
