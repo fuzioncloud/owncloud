@@ -1,12 +1,7 @@
 #!/bin/bash
 
-OWNCLOUDPATH=/opt/owncloud
-INSTALLED_FILENAME=${OWNCLOUDPATH}/installed
-
-if [ -e "${INSTALLED_FILENAME}" ]; then
-  exit 0
-fi
-
+OWNCLOUD_PATH=/opt/owncloud
+OWNCLOUD_ARCHIVE=owncloud-8.0.3.tar.bz2
 DATADIR=/data
 
 echo "install mySQL (set root user password to root)"
@@ -30,23 +25,21 @@ CREATE DATABASE IF NOT EXISTS owncloud;
 GRANT ALL PRIVILEGES ON owncloud.* TO 'owncloud'@'localhost' IDENTIFIED BY 'owncloud';
 EOFMYSQL
 
-wget http://apps.syncloud.org/owncloud-8.0.3.tar.bz2
-tar xjvf owncloud-8.0.3.tar.bz2 -C /opt
+wget http://apps.syncloud.org/${OWNCLOUD_ARCHIVE}
+tar xjvf ${OWNCLOUD_ARCHIVE} -C /opt
 if grep -q inet /etc/group; then
     # add www-data user to inet group
     usermod -a -G inet www-data
 fi
 
 echo "owncloud dir:"
-ls -la ${OWNCLOUDPATH}
+ls -la ${OWNCLOUD_PATH}
 
 echo "fixing apps permissions"
 chown -R www-data. /opt/owncloud/apps
-ls -la ${OWNCLOUDPATH}/apps/
+ls -la ${OWNCLOUD_PATH}/apps/
 
 echo "setup crontab task"
-su -c "echo \"*/1 * * * * php -f ${OWNCLOUDPATH}/cron.php\" | crontab -" www-data
+su -c "echo \"*/1 * * * * php -f ${OWNCLOUD_PATH}/cron.php\" | crontab -" www-data
 
 sed -i 's/[;]default_charset.*=.*/default_charset = "UTF-8"/g' /etc/php5/apache2/php.ini
-
-echo "Installed successfully" > ${INSTALLED_FILENAME}
