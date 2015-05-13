@@ -9,16 +9,6 @@ echo "mysql-server-5.5 mysql-server/root_password password root" | debconf-set-s
 echo "mysql-server-5.5 mysql-server/root_password_again password root" | debconf-set-selections
 apt-get -y install mysql-server-5.5 unzip php5-gd php5-json php5-mysql php5-curl php5-intl php5-mcrypt php5-imagick bzip2
 
-echo "fixing mysql"
-if [ -f /etc/mysql/debian.cnf ]; then
-    cat /etc/mysql/debian.cnf
-    echo "first line is corrupted on Cubian"
-    sed -i '/fgrep/d' /etc/mysql/debian.cnf
-fi
-if grep -q inet /etc/group; then
-    usermod -a -G inet mysql
-fi
-
 mysql -uroot -proot <<EOFMYSQL
 CREATE USER 'owncloud'@'localhost' IDENTIFIED BY 'owncloud';
 CREATE DATABASE IF NOT EXISTS owncloud;
@@ -27,11 +17,6 @@ EOFMYSQL
 
 wget --progress=dot:mega http://apps.syncloud.org/${OWNCLOUD_ARCHIVE}
 tar xjf ${OWNCLOUD_ARCHIVE} -C /opt
-if grep -q inet /etc/group; then
-    # add www-data user to inet group
-    usermod -a -G inet www-data
-fi
-
 echo "owncloud dir:"
 ls -la ${OWNCLOUD_PATH}
 
