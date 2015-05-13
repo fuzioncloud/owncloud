@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+import os
+import shutil
+from crontab import CronTab
+
+OWNCLOUD_PATH = '/opt/owncloud'
+OWNCLOUD_APACHE_LINK = '/var/www/owncloud'
+DATADIR = '/data'
+CRON_CMD = 'php -f ${OWNCLOUD_PATH}/cron.php'
+
+shutil.rmtree(OWNCLOUD_PATH)
+
+print("setup crontab task")
+cron = CronTab(user='www-data')
+for job in cron.find_command(CRON_CMD):
+    cron.remove(job)
+cron.write()
+
+print("recreate link for apache")
+if os.path.islink(OWNCLOUD_APACHE_LINK):
+    os.unlink(OWNCLOUD_APACHE_LINK)
