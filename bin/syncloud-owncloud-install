@@ -21,12 +21,13 @@ echo "owncloud dir:"
 ls -la ${OWNCLOUD_PATH}
 
 echo "fixing apps permissions"
-chown -R www-data. /opt/owncloud/apps
+chown -R www-data. ${OWNCLOUD_PATH}/apps
 ls -la ${OWNCLOUD_PATH}/apps/
 
 echo "setup crontab task"
-su -c "echo \"*/1 * * * * php -f ${OWNCLOUD_PATH}/cron.php\" | crontab -" www-data
+su -s /bin/bash -c "echo \"*/1 * * * * php -f ${OWNCLOUD_PATH}/cron.php\" | crontab -" www-data
 
 sed -i 's/[;]default_charset.*=.*/default_charset = "UTF-8"/g' /etc/php5/apache2/php.ini
+sed -i 's/[;]always_populate_raw_post_data.*=.*/always_populate_raw_post_data = -1/g' /etc/php5/cli/php.ini
 
 ln -s ${OWNCLOUD_PATH} /var/www/owncloud
