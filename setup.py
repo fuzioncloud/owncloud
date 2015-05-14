@@ -14,10 +14,10 @@ setup(
     description='ownCloud app',
     version=version,
     scripts=[
+        'bin/syncloud-owncloud-post-install',
         'bin/syncloud-owncloud-post-upgrade',
         'bin/syncloud-owncloud-pre-remove',
         'bin/syncloud-owncloud-reconfigure',
-        'bin/syncloud-owncloud-install',
         'bin/owncloud-ctl'],
     packages=['syncloud', 'syncloud.owncloud'],
     namespace_packages=['syncloud'],
