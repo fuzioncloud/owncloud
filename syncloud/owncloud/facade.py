@@ -10,10 +10,6 @@ from access import Access
 import setup
 
 
-tools_facade = Facade()
-default_config_path = join(tools_facade.usr_local_dir(), 'syncloud-owncloud', 'config')
-
-
 class OwncloudControl:
     def __init__(self, config, insider, access, config_manager):
         self.config_manager = config_manager
@@ -26,7 +22,7 @@ class OwncloudControl:
         # Activation needs default http owncloud site
         self.access.enable_http_web()
 
-        owncloud_url = 'http://{}:{}/{}'.format(host, self.config.port_http, self.config.url)
+        owncloud_url = 'http://{}:{}/{}'.format(host, self.config.port_http(), self.config.url())
         setup.finish(owncloud_url, login, password)
 
         # Now we can switch to
@@ -45,11 +41,11 @@ class OwncloudControl:
         return url
 
     def url(self):
-        info = self.insider.service_info(self.config.service_name)
+        info = self.insider.service_info(self.config.service_name())
         return self._get_url(info)
 
     def verify(self, host):
-        owncloud_url = 'http://{}:{}/{}'.format(host, self.config.port_http, self.config.url)
+        owncloud_url = 'http://{}:{}/{}'.format(host, self.config.port_http(), self.config.url())
         if not setup.is_finished(owncloud_url):
             raise Exception("not finished yet")
         else:
@@ -59,26 +55,11 @@ class OwncloudControl:
         self.access.update_trusted_info()
 
 
-def get_control(insider, config_path=default_config_path):
-    config_filename = os.path.join(config_path, 'owncloud-ctl.cfg')
+def get_control(insider):
 
-    parser = ConfigParser()
-    parser.read(config_filename)
+    config = Config()
 
-    service_name = parser.get('owncloud', 'service_name')
-    port_http = parser.getint('owncloud', 'port_http')
-    service_type_http = parser.get('owncloud', 'service_type_http')
-    port_https = parser.getint('owncloud', 'port_https')
-    service_type_https = parser.get('owncloud', 'service_type_https')
-    url = parser.get('owncloud', 'url')
-    config_file = parser.get('owncloud', 'config_file')
-    site_config_file = parser.get('owncloud', 'site_config_file')
-    site_name = parser.get('owncloud', 'site_name')
-
-    config = Config(service_name, port_http, service_type_http, port_https, service_type_https, url, config_file,
-                    site_config_file, site_name, config_path)
-
-    config_manager = ConfigManager(config.config_file)
+    config_manager = ConfigManager(config.config_file())
     access = Access(config, insider, config_manager, ApacheFacade())
 
     return OwncloudControl(config, insider, access, config_manager)

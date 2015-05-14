@@ -1,2 +1,5 @@
-#!/bin/bash
-syncloud-owncloud-install
+#!/usr/bin/env python
+from syncloud.owncloud import installer
+
+if __name__ == '__main__':
+    installer.install()
