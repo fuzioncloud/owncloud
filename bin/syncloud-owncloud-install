@@ -4,13 +4,9 @@ OWNCLOUD_PATH=/opt/owncloud
 OWNCLOUD_ARCHIVE=owncloud-8.0.3.tar.bz2
 DATADIR=/data
 
-echo "install mySQL (set root user password to root)"
-echo "mysql-server-5.5 mysql-server/root_password password root" | debconf-set-selections
-echo "mysql-server-5.5 mysql-server/root_password_again password root" | debconf-set-selections
-apt-get -y install mysql-server-5.5 unzip php5-gd php5-json php5-mysql php5-curl php5-intl php5-mcrypt php5-imagick bzip2
+apt-get -y install php5-gd php5-json php5-mysql php5-curl php5-intl php5-mcrypt php5-imagick
 
 mysql -uroot -proot <<EOFMYSQL
-CREATE USER 'owncloud'@'localhost' IDENTIFIED BY 'owncloud';
 CREATE DATABASE IF NOT EXISTS owncloud;
 GRANT ALL PRIVILEGES ON owncloud.* TO 'owncloud'@'localhost' IDENTIFIED BY 'owncloud';
 EOFMYSQL
