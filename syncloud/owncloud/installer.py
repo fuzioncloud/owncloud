@@ -3,7 +3,7 @@ import shutil
 import tarfile
 from os.path import isfile
 import massedit
-from syncloud.apache.apt import Apt
+from syncloud.tools.apt import Apt
 import MySQLdb
 from syncloud.insider.facade import get_insider
 import wget
