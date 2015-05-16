@@ -23,11 +23,11 @@ def install():
 
     Apt().install(['php5-gd', 'php5-json', 'php5-mysql', 'php5-curl', 'php5-intl', 'php5-mcrypt', 'php5-imagick'])
 
-    con = MySQLdb.connect('localhost', 'root', 'root')
-    with con:
-        cur = con.cursor()
-        cur.execute("CREATE DATABASE IF NOT EXISTS owncloud")
-        cur.execute("GRANT ALL PRIVILEGES ON owncloud.* TO 'owncloud'@'localhost' IDENTIFIED BY 'owncloud'")
+    # con = MySQLdb.connect('localhost', 'root', 'root')
+    # with con:
+    #     cur = con.cursor()
+    #     cur.execute("CREATE DATABASE IF NOT EXISTS owncloud")
+    #     cur.execute("GRANT ALL PRIVILEGES ON owncloud.* TO 'owncloud'@'localhost' IDENTIFIED BY 'owncloud'")
 
     if isfile(OWNCLOUD_ARCHIVE_TMP):
         os.remove(OWNCLOUD_ARCHIVE_TMP)
