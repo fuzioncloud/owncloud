@@ -45,11 +45,7 @@ class OwncloudControl:
         return self._get_url(info)
 
     def verify(self, host):
-        owncloud_url = 'http://{}:{}/{}'.format(host, self.config.port_http(), self.config.url())
-        if not setup.is_finished(owncloud_url):
-            raise Exception("not finished yet")
-        else:
-            return "finished"
+        return setup.is_finished('http://{}:{}/{}'.format(host, self.config.port_http(), self.config.url()))
 
     def reconfigure(self):
         self.access.update_trusted_info()
