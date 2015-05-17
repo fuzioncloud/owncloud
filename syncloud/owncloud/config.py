@@ -3,15 +3,17 @@ from os.path import join
 from syncloud.tools.facade import Facade
 
 tools_facade = Facade()
-default_config_path = join(tools_facade.usr_local_dir(), 'syncloud-owncloud', 'config', 'owncloud-ctl.cfg')
+default_config_path = join(tools_facade.usr_local_dir(), 'syncloud-owncloud', 'config')
+default_config_file = join(default_config_path, 'owncloud-ctl.cfg')
 
 
 class Config:
 
-    def __init__(self, filename=default_config_path):
+    def __init__(self, filename=default_config_file, config_path=default_config_path):
         self.parser = ConfigParser()
         self.parser.read(filename)
         self.filename = filename
+        self.config_path = config_path
 
     def service_name(self):
         return self.parser.get('owncloud', 'service_name')
@@ -54,3 +56,6 @@ class Config:
 
     def data_dir(self):
         return self.parser.get('owncloud', 'data_dir')
+
+    def config_path(self):
+        return self.config_path
