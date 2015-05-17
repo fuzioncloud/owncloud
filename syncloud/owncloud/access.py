@@ -7,7 +7,7 @@ class Access:
         self.config = config
         self.insider = insider
         self.config_manager = config_manager
-        self.site_config_file_full = join(config.config_path(), config.site_config_file())
+        self.site_config_file_full = join(config.config_path, config.site_config_file())
 
     def update_insider(self, protocol, service_type, port):
         self.insider.remove_service(self.config.service_name())

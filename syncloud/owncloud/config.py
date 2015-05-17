@@ -56,6 +56,3 @@ class Config:
 
     def data_dir(self):
         return self.parser.get('owncloud', 'data_dir')
-
-    def config_path(self):
-        return self.config_path
