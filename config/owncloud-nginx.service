@@ -1,0 +1,16 @@
+[Unit]
+Description=ownCloud nginx
+Requires=owncloud-php-fpm.service
+After=owncloud-php-fpm.service
+
+[Service]
+Type=forking
+PIDFile=/opt/syncloud-owncloud/nginx/logs/nginx.pid
+#RootDirectory=/opt/syncloud-owncloud/nginx
+ExecStartPre=/opt/syncloud-owncloud/nginx/sbin/nginx -t -c /opt/syncloud-owncloud/config/nginx.conf
+ExecStart=/opt/syncloud-owncloud/nginx/sbin/nginx -c /opt/syncloud-owncloud/config/nginx.conf
+ExecReload=/opt/syncloud-owncloud/nginx/sbin/nginx -c /opt/syncloud-owncloud/config/nginx.conf -s reload
+ExecStop=/opt/syncloud-owncloud/nginx/sbin/nginx -c /opt/syncloud-owncloud/config/nginx.conf -s stop
+
+[Install]
+WantedBy=multi-user.target

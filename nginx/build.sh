@@ -7,7 +7,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 NAME=nginx
 VERSION=1.8.0
-ROOT=/opt/syncloud-platform
+ROOT=/opt/syncloud-owncloud
 PREFIX=${ROOT}/${NAME}
 
 apt-get -y install build-essential flex bison libreadline-dev zlib1g-dev libpcre3-dev
@@ -25,6 +25,6 @@ rm -rf ${PREFIX}
 make install
 cd ..
 
-tar czf ${NAME}-${VERSION}.tar.gz -C ${ROOT} ${NAME}
+tar cpzf ${NAME}.tar.gz -C ${ROOT} ${NAME}
 
 cd ..

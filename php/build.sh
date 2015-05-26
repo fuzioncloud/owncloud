@@ -10,7 +10,7 @@ VERSION=5.6.9
 ROOT=/opt/syncloud-owncloud
 PREFIX=${ROOT}/${NAME}
 
-apt-get -y install libxml2-dev autoconf
+apt-get -y install libxml2-dev autoconf libjpeg-dev libpng12-dev libfreetype6-dev libzip2 libzip-dev zlib1g-dev
 
 rm -rf build
 mkdir -p build
@@ -29,11 +29,19 @@ cd ${NAME}-${VERSION}
 #./buildconf --force
 #./configure --enable-fpm --with-mysql --enable-apc --prefix ${PREFIX} --with-config-file-path=${ROOT}/config
 
-./configure --enable-fpm --with-mysql --enable-opcache --prefix ${PREFIX} --with-config-file-path=${ROOT}/config
+./configure \
+    --enable-fpm \
+    --with-mysql \
+    --enable-opcache \
+    --prefix ${PREFIX} \
+    --with-config-file-path=${ROOT}/config \
+    --with-gd \
+    --enable-zip \
+    --with-zlib
 make
 rm -rf ${PREFIX}
 make install
 cd ..
-tar czf ${NAME}-${VERSION}.tar.gz -C ${ROOT} ${NAME}
+tar cpzf ${NAME}.tar.gz -C ${ROOT} ${NAME}
 
 cd ..

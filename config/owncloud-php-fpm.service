@@ -1,0 +1,13 @@
+[Unit]
+Description=ownCloud php fpm
+Requires=syslog.target network.target
+After=syslog.target network.target
+
+[Service]
+Type=forking
+PIDFile=/opt/syncloud-owncloud/php/var/run/php-fpm.pid
+ExecStart=/opt/syncloud-owncloud/php/sbin/php-fpm -y /opt/syncloud-owncloud/config/php-fpm.conf -c /opt/syncloud-owncloud/config/php.ini
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
