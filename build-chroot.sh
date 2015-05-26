@@ -8,6 +8,6 @@ elae
 fi
 
 tar xzf rootfs.tar.gz
-cp build.sh rootfs/root
+cp -r ./* rootfs/root
 chroot rootfs root/build.sh
-mv rootfs/root/build/nginx*.tar.gz .
+mv rootfs/root/syncloud-owncloud.tar.gz .
