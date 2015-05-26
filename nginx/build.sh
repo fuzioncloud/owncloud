@@ -10,6 +10,8 @@ VERSION=1.8.0
 ROOT=/opt/syncloud-platform
 PREFIX=${ROOT}/${NAME}
 
+mkdir -p ${ROOT}
+
 apt-get -y install build-essential flex bison libreadline-dev zlib1g-dev libpcre3-dev
 rm -rf ${NAME}-${VERSION}.tar.gz*
 wget http://nginx.org/download/${NAME}-${VERSION}.tar.gz

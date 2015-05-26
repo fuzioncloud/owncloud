@@ -10,6 +10,8 @@ VERSION=5.6.9
 ROOT=/opt/syncloud-owncloud
 PREFIX=${ROOT}/${NAME}
 
+mkdir -p ${ROOT}
+
 apt-get -y install libxml2-dev autoconf
 rm -rf ${NAME}-${VERSION}.tar.bz2*
 rm -rf ${NAME}-${VERSION}
