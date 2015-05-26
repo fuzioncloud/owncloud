@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
@@ -9,6 +10,8 @@ NAME=nginx
 VERSION=1.8.0
 ROOT=/opt/syncloud-owncloud
 PREFIX=${ROOT}/${NAME}
+
+echo "building ${NAME}"
 
 apt-get -y install build-essential flex bison libreadline-dev zlib1g-dev libpcre3-dev
 

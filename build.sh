@@ -13,10 +13,14 @@ USER=www-data
 
 if [ ! -d php/build ]; then
   ./php/build.sh
+else
+  echo "skipping php build"
 fi
 
 if [ ! -d nginx/build ]; then
   ./nginx/build.sh
+else
+  echo "skipping nginx build"
 fi
 
 rm -rf build

@@ -10,6 +10,8 @@ VERSION=5.6.9
 ROOT=/opt/syncloud-owncloud
 PREFIX=${ROOT}/${NAME}
 
+echo "building ${NAME}"
+
 apt-get -y install libxml2-dev autoconf libjpeg-dev libpng12-dev libfreetype6-dev libzip2 libzip-dev zlib1g-dev
 
 rm -rf build
