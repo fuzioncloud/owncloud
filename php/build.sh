@@ -10,11 +10,12 @@ VERSION=5.6.9
 ROOT=/opt/syncloud-owncloud
 PREFIX=${ROOT}/${NAME}
 
-mkdir -p ${ROOT}
-
 apt-get -y install libxml2-dev autoconf
-rm -rf ${NAME}-${VERSION}.tar.bz2*
-rm -rf ${NAME}-${VERSION}
+
+rm -rf build
+mkdir -p build
+cd build
+
 wget http://php.net/get/${NAME}-${VERSION}.tar.bz2/from/this/mirror -O ${NAME}-${VERSION}.tar.bz2
 tar xjf ${NAME}-${VERSION}.tar.bz2
 cd ${NAME}-${VERSION}
@@ -34,3 +35,5 @@ rm -rf ${PREFIX}
 make install
 cd ..
 tar czf ${NAME}-${VERSION}.tar.gz -C ${ROOT} ${NAME}
+
+cd ..
