@@ -16,14 +16,17 @@ rm -rf ${NAME}-${VERSION}
 wget http://php.net/get/${NAME}-${VERSION}.tar.bz2/from/this/mirror -O ${NAME}-${VERSION}.tar.bz2
 tar xjf ${NAME}-${VERSION}.tar.bz2
 cd ${NAME}-${VERSION}
-cd ext
-wget http://pecl.php.net/get/APC-3.1.9.tgz
-tar xzf APC-3.1.9.tgz
-mv APC-3.1.9 apc
-cd ..
-rm configure
-./buildconf --force
-./configure --enable-fpm --with-mysql --enable-apc --prefix ${PREFIX} --with-config-file-path=${ROOT}/config
+
+#cd ext
+#wget http://pecl.php.net/get/APC-3.1.9.tgz
+#tar xzf APC-3.1.9.tgz
+#mv APC-3.1.9 apc
+#cd ..
+#rm configure
+#./buildconf --force
+#./configure --enable-fpm --with-mysql --enable-apc --prefix ${PREFIX} --with-config-file-path=${ROOT}/config
+
+./configure --enable-fpm --with-mysql --enable-opcache --prefix ${PREFIX} --with-config-file-path=${ROOT}/config
 make
 rm -rf ${PREFIX}
 make install
