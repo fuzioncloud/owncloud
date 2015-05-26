@@ -11,6 +11,8 @@ APP_ROOT=${ROOT}/${APP_NAME}
 PREFIX=${APP_ROOT}/${NAME}
 USER=www-data
 
+ls -la
+
 if [ ! -d php/build ]; then
   ./php/build.sh
 else
