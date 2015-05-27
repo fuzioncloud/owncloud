@@ -12,7 +12,7 @@ PREFIX=${ROOT}/${NAME}
 
 echo "building ${NAME}"
 
-apt-get -y install libxml2-dev autoconf libjpeg-dev libpng12-dev libfreetype6-dev libzip2 libzip-dev zlib1g-dev
+apt-get -y install build-essential libxml2-dev autoconf libjpeg-dev libpng12-dev libfreetype6-dev libzip2 libzip-dev zlib1g-dev
 
 rm -rf build
 mkdir -p build
