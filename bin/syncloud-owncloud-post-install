@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-from syncloud.owncloud import installer
+from syncloud.owncloud.installer import Installer
 from syncloud.app import logger
 import logging
 
 if __name__ == '__main__':
     logger.init(logging.DEBUG, console=True, line_format='%(message)s')
-    installer.install()
+    Installer().install()
