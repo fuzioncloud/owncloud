@@ -1,84 +1,72 @@
 import os
 import shutil
 import tarfile
-from os.path import isfile
-import massedit
-from syncloud.tools.apt import Apt
-import MySQLdb
+from os.path import isfile, join
+from subprocess import check_output
+
 from syncloud.insider.facade import get_insider
 import wget
-from pwd import getpwnam
-from grp import getgrnam
-from syncloud.owncloud import apache
+
 from syncloud.owncloud.config import Config
 from syncloud.owncloud.cron import OwncloudCron
 
-OWNCLOUD_ARCHIVE = 'owncloud-8.0.3.tar.bz2'
+
+OWNCLOUD_ARCHIVE = 'syncloud-owncloud.tar.gz'
 OWNCLOUD_ARCHIVE_TMP = '/tmp/{0}/'.format(OWNCLOUD_ARCHIVE)
+SYSTEMD_NGINX_NAME = 'owncloud-nginx.service'
+SYSTEMD_PHP_FPM_NAME = 'owncloud-php-fpm.service'
+
+SYSTEMD_DIR = join('/lib', 'systemd', 'system')
 
 
-def install():
+class Installer():
+    def __init__(self):
+        self.config = Config()
+        self.SYSTEMD_NGINX_FILE = join(self.config.install_path(), 'config', SYSTEMD_NGINX_NAME)
+        self.SYSTEMD_PHP_FPM_FILE = join(self.config.install_path(), 'config', SYSTEMD_PHP_FPM_NAME)
+        self.cron = OwncloudCron(self.config)
 
-    config = Config()
+    def install(self):
 
-    Apt().install(['php5-gd', 'php5-json', 'php5-mysql', 'php5-curl', 'php5-intl', 'php5-mcrypt', 'php5-imagick'])
+        if isfile(OWNCLOUD_ARCHIVE_TMP):
+            os.remove(OWNCLOUD_ARCHIVE_TMP)
 
-    # con = MySQLdb.connect('localhost', 'root', 'root')
-    # with con:
-    #     cur = con.cursor()
-    #     cur.execute("CREATE DATABASE IF NOT EXISTS owncloud")
-    #     cur.execute("GRANT ALL PRIVILEGES ON owncloud.* TO 'owncloud'@'localhost' IDENTIFIED BY 'owncloud'")
+        url = 'http://apps.syncloud.org/{0}'.format(OWNCLOUD_ARCHIVE)
+        out = '/tmp/{0}'.format(OWNCLOUD_ARCHIVE)
+        print("saving {0} to {1}".format(url, out))
+        filename = wget.download(url, out)
 
-    if isfile(OWNCLOUD_ARCHIVE_TMP):
-        os.remove(OWNCLOUD_ARCHIVE_TMP)
+        print("extracting {0}".format(filename))
+        tarfile.open(filename).extractall(self.config.root_path())
 
-    url = 'http://apps.syncloud.org/{0}'.format(OWNCLOUD_ARCHIVE)
-    out = '/tmp/{0}'.format(OWNCLOUD_ARCHIVE)
-    print("saving {0} to {1}".format(url, out))
-    filename = wget.download(url, out)
+        print("setup crontab task")
+        self.cron.remove()
+        self.cron.create()
 
-    print("extracting {0}".format(filename))
-    tarfile.open(filename).extractall('/opt')
+        print("setup systemd")
+        shutil.copy(self.SYSTEMD_NGINX_FILE, SYSTEMD_DIR)
+        shutil.copy(self.SYSTEMD_PHP_FPM_FILE, SYSTEMD_DIR)
 
-    print("owncloud dir:")
-    os.system('ls -la {0}'.format(config.install_path()))
+        check_output('systemctl enable -f {0}'.format(SYSTEMD_PHP_FPM_NAME), shell=True)
+        check_output('systemctl enable -f {0}'.format(SYSTEMD_NGINX_NAME), shell=True)
 
-    print("fixing apps permissions")
-    os.chown(
-        '{0}/apps'.format(config.install_path()),
-        getpwnam(config.cron_user()).pw_uid,
-        getgrnam(config.cron_user()).gr_gid)
-    os.system('ls -la {0}/apps/'.format(config.install_path()))
+        check_output('systemctl daemon-reload', shell=True)
 
-    print("setup crontab task")
-    cron = OwncloudCron(config)
-    cron.remove()
-    cron.create()
+        check_output('systemctl start {0}'.format(SYSTEMD_PHP_FPM_NAME), shell=True)
+        check_output('systemctl start {0}'.format(SYSTEMD_NGINX_NAME), shell=True)
 
-    print("fixing php.ini")
-    fix_php_charset()
-    fix_php_raw_post_data()
+    def remove(self):
 
-    print("recreate link for apache")
-    apache.drop_link(config.apache_link())
-    apache.create_link(config.install_path(), config.apache_link())
+        check_output('systemctl stop {0}'.format(SYSTEMD_NGINX_NAME), shell=True)
+        check_output('systemctl stop {0}'.format(SYSTEMD_PHP_FPM_NAME), shell=True)
 
+        if os.path.isfile(join(SYSTEMD_DIR, self.SYSTEMD_NGINX_FILE)):
+            os.remove(join(SYSTEMD_DIR, self.SYSTEMD_NGINX_FILE))
 
-def remove():
-    config = Config()
-    shutil.rmtree(config.install_path())
-    apache.drop_link(config.apache_link())
-    (OwncloudCron(config)).remove()
-    get_insider().remove_service(config.service_name())
+        if os.path.isfile(join(SYSTEMD_DIR, self.SYSTEMD_PHP_FPM_FILE)):
+            os.remove(join(SYSTEMD_DIR, self.SYSTEMD_PHP_FPM_FILE))
 
+        self.cron.remove()
+        get_insider().remove_service(self.config.service_name())
 
-def fix_php_charset(php_ini='/etc/php5/apache2/php.ini'):
-    massedit.edit_files(
-        [php_ini],
-        ["re.sub('[;]default_charset.*=.*', 'default_charset = \"UTF-8\"', line)"], dry_run=False)
-
-
-def fix_php_raw_post_data(php_ini='/etc/php5/cli/php.ini'):
-    massedit.edit_files(
-        [php_ini],
-        ["re.sub('[;]always_populate_raw_post_data.*=.*', 'always_populate_raw_post_data = -1', line)"], dry_run=False)
+        shutil.rmtree(self.config.install_path())

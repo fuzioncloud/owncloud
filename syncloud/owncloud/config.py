@@ -51,8 +51,8 @@ class Config:
     def cron_cmd(self):
         return self.parser.get('owncloud', 'cron_cmd')
 
-    def apache_link(self):
-        return self.parser.get('owncloud', 'apache_link')
-
     def data_dir(self):
         return self.parser.get('owncloud', 'data_dir')
+
+    def root_path(self):
+        return self.parser.get('owncloud', 'root_path')

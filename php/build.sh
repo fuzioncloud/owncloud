@@ -42,7 +42,7 @@ cd ${NAME}-${VERSION}
     --enable-zip \
     --with-zlib \
     --with-curl
-make
+make -j2
 rm -rf ${PREFIX}
 make install
 cd ..
