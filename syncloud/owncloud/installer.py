@@ -34,7 +34,7 @@ class Installer():
         if isfile(OWNCLOUD_ARCHIVE_TMP):
             os.remove(OWNCLOUD_ARCHIVE_TMP)
         arch = check_output('uname -m', shell=True).strip()
-        url = 'http://apps.syncloud.org/{0}/{1}/{2}'.format(self.sam.config.release(), arch, OWNCLOUD_ARCHIVE)
+        url = 'http://apps.syncloud.org/{0}/{1}/{2}'.format(self.sam.get_release(), arch, OWNCLOUD_ARCHIVE)
         out = '/tmp/{0}'.format(OWNCLOUD_ARCHIVE)
         print("saving {0} to {1}".format(url, out))
         filename = wget.download(url, out)
