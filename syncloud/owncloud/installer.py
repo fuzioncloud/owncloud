@@ -5,6 +5,7 @@ from os.path import isfile, join
 from subprocess import check_output
 
 from syncloud.insider.facade import get_insider
+from syncloud.sam.manager import get_sam
 import wget
 
 from syncloud.owncloud.config import Config
@@ -25,13 +26,15 @@ class Installer():
         self.SYSTEMD_NGINX_FILE = join(self.config.install_path(), 'config', SYSTEMD_NGINX_NAME)
         self.SYSTEMD_PHP_FPM_FILE = join(self.config.install_path(), 'config', SYSTEMD_PHP_FPM_NAME)
         self.cron = OwncloudCron(self.config)
+        self.sam = get_sam()
+        self.insider = get_insider()
 
     def install(self):
 
         if isfile(OWNCLOUD_ARCHIVE_TMP):
             os.remove(OWNCLOUD_ARCHIVE_TMP)
-
-        url = 'http://apps.syncloud.org/{0}'.format(OWNCLOUD_ARCHIVE)
+        arch = check_output('uname -m', shell=True).strip()
+        url = 'http://apps.syncloud.org/{0}/{1}/{2}'.format(self.sam.config.release(), arch, OWNCLOUD_ARCHIVE)
         out = '/tmp/{0}'.format(OWNCLOUD_ARCHIVE)
         print("saving {0} to {1}".format(url, out))
         filename = wget.download(url, out)
@@ -67,6 +70,6 @@ class Installer():
             os.remove(join(SYSTEMD_DIR, self.SYSTEMD_PHP_FPM_FILE))
 
         self.cron.remove()
-        get_insider().remove_service(self.config.service_name())
+        self.insider.remove_service(self.config.service_name())
 
         shutil.rmtree(self.config.install_path())
