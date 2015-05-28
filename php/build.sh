@@ -13,7 +13,7 @@ PREFIX=${ROOT}/${NAME}
 echo "building ${NAME}"
 
 apt-get -y install build-essential \
-    libxml2-dev autoconf libjpeg-dev libpng12-dev libfreetype6-dev libzip2 libzip-dev zlib1g-dev libcurl4-gnutls-dev
+    libxml2-dev autoconf libjpeg-dev libpng12-dev libfreetype6-dev libzip2 libzip-dev zlib1g-dev libcurl4-gnutls-dev dpkg-dev
 
 rm -rf build
 mkdir -p build
@@ -45,6 +45,10 @@ cd ${NAME}-${VERSION}
 make -j2
 rm -rf ${PREFIX}
 make install
+
+cp -rp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libpng12.so* ${PREFIX}/lib
+cp -rp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libcurl-gnutls.so* ${PREFIX}/lib
+
 cd ..
 tar cpzf ${NAME}.tar.gz -C ${ROOT} ${NAME}
 

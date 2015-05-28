@@ -7,6 +7,7 @@ After=network.target
 Type=forking
 PIDFile=/opt/syncloud-owncloud/php/var/run/php-fpm.pid
 ExecStart=/opt/syncloud-owncloud/php/sbin/php-fpm -y /opt/syncloud-owncloud/config/php-fpm.conf -c /opt/syncloud-owncloud/config/php.ini
+Environment=LD_LIBRARY_PATH=/opt/syncloud-owncloud/php/lib
 RemainAfterExit=yes
 
 [Install]
