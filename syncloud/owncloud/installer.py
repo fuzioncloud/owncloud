@@ -74,4 +74,5 @@ class Installer():
 
         self.cron.remove()
 
-        shutil.rmtree(self.config.install_path())
+        if os.path.isdir(self.config.install_path()):
+            shutil.rmtree(self.config.install_path())
