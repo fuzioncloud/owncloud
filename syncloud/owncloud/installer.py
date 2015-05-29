@@ -4,7 +4,6 @@ import tarfile
 from os.path import isfile, join
 from subprocess import check_output
 import MySQLdb
-from syncloud.insider.facade import get_insider
 from syncloud.sam.manager import get_sam
 import wget
 
@@ -27,7 +26,6 @@ class Installer():
         self.SYSTEMD_PHP_FPM_FILE = join(self.config.install_path(), 'config', SYSTEMD_PHP_FPM_NAME)
         self.cron = OwncloudCron(self.config)
         self.sam = get_sam()
-        self.insider = get_insider()
 
     def install(self):
 
@@ -75,6 +73,5 @@ class Installer():
             os.remove(join(SYSTEMD_DIR, self.SYSTEMD_PHP_FPM_FILE))
 
         self.cron.remove()
-        self.insider.remove_service(self.config.service_name())
 
         shutil.rmtree(self.config.install_path())
