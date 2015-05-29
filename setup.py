@@ -4,7 +4,8 @@ from os.path import join, dirname
 requirements = [
     'requests',
     'beautifulsoup4',
-    'syncloud-platform'
+    'syncloud-platform',
+    'MySQL-python==1.2.5'
 ]
 
 version = open(join(dirname(__file__), 'version')).read().strip()

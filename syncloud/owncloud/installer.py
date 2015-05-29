@@ -3,7 +3,7 @@ import shutil
 import tarfile
 from os.path import isfile, join
 from subprocess import check_output
-
+import MySQLdb
 from syncloud.insider.facade import get_insider
 from syncloud.sam.manager import get_sam
 import wget
@@ -30,6 +30,12 @@ class Installer():
         self.insider = get_insider()
 
     def install(self):
+
+        con = MySQLdb.connect('localhost', 'root', 'root')
+        with con:
+            cur = con.cursor()
+            cur.execute("CREATE DATABASE IF NOT EXISTS owncloud")
+            cur.execute("GRANT ALL PRIVILEGES ON owncloud.* TO 'owncloud'@'localhost' IDENTIFIED BY 'owncloud'")
 
         if isfile(OWNCLOUD_ARCHIVE_TMP):
             os.remove(OWNCLOUD_ARCHIVE_TMP)
