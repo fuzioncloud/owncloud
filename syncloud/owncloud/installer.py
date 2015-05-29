@@ -13,7 +13,7 @@ from syncloud.owncloud.cron import OwncloudCron
 
 
 OWNCLOUD_ARCHIVE = 'syncloud-owncloud.tar.gz'
-OWNCLOUD_ARCHIVE_TMP = '/tmp/{0}/'.format(OWNCLOUD_ARCHIVE)
+OWNCLOUD_ARCHIVE_TMP = '/tmp/{0}'.format(OWNCLOUD_ARCHIVE)
 SYSTEMD_NGINX_NAME = 'owncloud-nginx.service'
 SYSTEMD_PHP_FPM_NAME = 'owncloud-php-fpm.service'
 
@@ -41,9 +41,8 @@ class Installer():
             os.remove(OWNCLOUD_ARCHIVE_TMP)
         arch = check_output('uname -m', shell=True).strip()
         url = 'http://apps.syncloud.org/{0}/{1}/{2}'.format(self.sam.get_release(), arch, OWNCLOUD_ARCHIVE)
-        out = '/tmp/{0}'.format(OWNCLOUD_ARCHIVE)
-        print("saving {0} to {1}".format(url, out))
-        filename = wget.download(url, out)
+        print("saving {0} to {1}".format(url, OWNCLOUD_ARCHIVE_TMP))
+        filename = wget.download(url, OWNCLOUD_ARCHIVE_TMP)
 
         print("extracting {0}".format(filename))
         tarfile.open(filename).extractall(self.config.root_path())
