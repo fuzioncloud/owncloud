@@ -35,6 +35,8 @@ cd ${NAME}-${VERSION}
 ./configure \
     --enable-fpm \
     --with-mysql \
+    --with-mysqli \
+    --with-pdo-mysql \
     --enable-opcache \
     --prefix ${PREFIX} \
     --with-config-file-path=${ROOT}/config \
