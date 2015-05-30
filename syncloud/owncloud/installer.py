@@ -44,7 +44,7 @@ class Installer:
 
         app_data_dir = app.get_data_dir('owncloud')
         app_config_dir = join(app_data_dir, 'config')
-        print("checking add config folder: {0}".format(app_config_dir))
+        print("checking app config folder: {0}".format(app_config_dir))
         if not os.path.isdir(app_config_dir):
             print("creating app config folder")
             os.mkdir(app_config_dir)
