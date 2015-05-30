@@ -8,6 +8,7 @@ VERSION=8.0.3
 ROOT=/opt
 APP_NAME=syncloud-owncloud
 APP_ROOT=${ROOT}/${APP_NAME}
+APP_DATA_ROOT=${ROOT}/data/${APP_NAME}
 PREFIX=${APP_ROOT}/${NAME}
 USER=www-data
 
@@ -45,7 +46,7 @@ tar xzf php/build/php.tar.gz -C ${APP_ROOT}/
 tar xzf nginx/build/nginx.tar.gz -C ${APP_ROOT}/
 
 mv ${APP_ROOT}/owncloud/config ${APP_ROOT}/owncloud/config.orig
-ln -s /opr/data/owncloud/config ${APP_ROOT}/owncloud/config
+ln -s ${APP_DATA_ROOT}/config ${APP_ROOT}/owncloud/config
 chown -R ${USER}. ${APP_ROOT}/owncloud/config
 
 chown -R ${USER}. ${APP_ROOT}/owncloud/apps
