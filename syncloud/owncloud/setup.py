@@ -21,6 +21,10 @@ def finish(owncloud_url, login, password):
                                  'dbtype': 'mysql', 'dbname': 'owncloud',
                                  'dbuser': 'root', 'dbpass': 'root',
                                  'dbhost': 'localhost', 'directory': '/data'}, allow_redirects=False)
+    if response.status_code == 302:
+        log.info("successful login redirect")
+        return True
+
     if response.status_code != 200:
         raise Exception("unable to finish setup: {0}: {0}".format(response.status_code, response.text))
 
