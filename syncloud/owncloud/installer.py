@@ -1,13 +1,16 @@
+from grp import getgrnam
 import os
+from pwd import getpwnam
 import shutil
 import tarfile
-from os.path import isfile
+from os.path import isfile, join
 from subprocess import check_output
 
 import MySQLdb
 
 from syncloud.sam.manager import get_sam
 from syncloud.systemd.systemctl import remove_service, add_service
+from syncloud.tools import app
 
 import wget
 
@@ -21,7 +24,7 @@ SYSTEMD_NGINX_NAME = 'owncloud-nginx'
 SYSTEMD_PHP_FPM_NAME = 'owncloud-php-fpm'
 
 
-class Installer():
+class Installer:
     def __init__(self):
         self.config = Config()
         self.cron = OwncloudCron(self.config)
@@ -38,6 +41,18 @@ class Installer():
 
         print("extracting {0}".format(filename))
         tarfile.open(filename).extractall(self.config.root_path())
+
+        app_data_dir = app.get_data_dir('owncloud')
+        app_config_dir = join(app_data_dir, 'config')
+        print("checking add config folder: {0}".format(app_config_dir))
+        if not os.path.isdir(app_config_dir):
+            print("creating app config folder")
+            os.mkdir(app_config_dir)
+            os.chown(app_config_dir,
+                     getpwnam(self.config.cron_user()).pw_uid,
+                     getgrnam(self.config.cron_user()).gr_gid)
+        else:
+            print("app config folder already exists")
 
         print("setup database")
         con = MySQLdb.connect('localhost', 'root', 'root')

@@ -37,11 +37,16 @@ mkdir ${APP_ROOT}
 tar xjf ${NAME}-${VERSION}.tar.bz2 -C ${APP_ROOT}/
 
 cd ..
+
+cp -r bin ${APP_ROOT}/
 cp -r config ${APP_ROOT}/
+
 tar xzf php/build/php.tar.gz -C ${APP_ROOT}/
 tar xzf nginx/build/nginx.tar.gz -C ${APP_ROOT}/
 
-chown -R ${USER}. ${APP_ROOT}/owncloud/config
+mv ${APP_ROOT}/owncloud/config ${APP_ROOT}/owncloud/config.orig
+ln -s /opr/data/owncloud/config ${APP_ROOT}/owncloud/config
+chown -R ${USER}. /opr/data/owncloud/config
 chown -R ${USER}. ${APP_ROOT}/owncloud/apps
 
 tar cpzf ${APP_NAME}.tar.gz -C ${ROOT} ${APP_NAME}
