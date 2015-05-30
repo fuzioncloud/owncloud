@@ -4,17 +4,15 @@ from bs4 import BeautifulSoup
 import logging
 from syncloud.app import logger
 
-log = logging.getLogger()
-
-
 def finish(owncloud_url, login, password):
+    log = logger.get_logger('owncloud.setup.finish')
 
     if is_finished(owncloud_url):
         return True
 
     index_url = get_index_url(owncloud_url)
 
-    log.info("will finish setup using: %s", index_url)
+    log.info("will finish setup using: {0}".format(index_url))
 
     response = requests.post(index_url,
                              data={
@@ -22,7 +20,7 @@ def finish(owncloud_url, login, password):
                                  'adminpass': password, 'adminpass-clone': password,
                                  'dbtype': 'mysql', 'dbname': 'owncloud',
                                  'dbuser': 'root', 'dbpass': 'root',
-                                 'dbhost': 'localhost', 'directory': '/data'})
+                                 'dbhost': 'localhost', 'directory': '/data'}, allow_redirects=False)
     if response.status_code != 200:
         raise Exception("unable to finish setup: {}".format(response.text))
 
