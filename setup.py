@@ -16,7 +16,6 @@ setup(
     version=version,
     scripts=[
         'bin/syncloud-owncloud-post-install',
-        'bin/syncloud-owncloud-post-upgrade',
         'bin/syncloud-owncloud-pre-remove',
         'bin/syncloud-owncloud-reconfigure',
         'bin/owncloud-ctl'],
