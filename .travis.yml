@@ -16,6 +16,6 @@ deploy:
     secure: jHE98B5Asprq16ly3hQl/0moVSdwwzrEj5lvo3VuzLynMPN34DZ2NxIVzlk0kVibWlmRMSHVz9OXu617CAM2zdBNsEc50JobB3pTFv7Weh/jUUvTVX4fadP/Py4NntmwKx5derb/NkVmSMC2p38ymQQEoqHfZuDwZDF0SDSkhIw=
 after_deploy:
 - pip install travis-tools
-- universal-version-push version syncloud/image syncloud-build GH_TOKEN master "Travis build"
+#- universal-version-push version syncloud/image syncloud-build GH_TOKEN master "Travis build"
 - version-increment version
 - universal-version-push version ${TRAVIS_REPO_SLUG} syncloud-build GH_TOKEN ${TRAVIS_BRANCH} "Travis build [skip ci]"

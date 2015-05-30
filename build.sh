@@ -40,6 +40,8 @@ tar xjf ${NAME}-${VERSION}.tar.bz2 -C ${APP_ROOT}/
 cd ..
 
 cp -r bin ${APP_ROOT}/
+chown -R ${USER}. ${APP_ROOT}/bin/
+
 cp -r config ${APP_ROOT}/
 
 tar xzf php/build/php.tar.gz -C ${APP_ROOT}/
