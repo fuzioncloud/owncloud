@@ -7,7 +7,7 @@ from subprocess import check_output
 import MySQLdb
 
 from syncloud.sam.manager import get_sam
-from syncloud.systemd.systemctl import remove_service
+from syncloud.systemd.systemctl import remove_service, add_service
 
 import wget
 
@@ -51,13 +51,13 @@ class Installer():
         self.cron.create()
 
         print("setup systemd")
-        systemd.__add_service(self.config.install_path(), SYSTEMD_PHP_FPM_NAME)
-        self.__add_service(self.config.install_path(), SYSTEMD_NGINX_NAME)
+        add_service(self.config.install_path(), SYSTEMD_PHP_FPM_NAME)
+        add_service(self.config.install_path(), SYSTEMD_NGINX_NAME)
 
     def remove(self):
 
         remove_service(SYSTEMD_NGINX_NAME)
-        __remove_service(SYSTEMD_PHP_FPM_NAME)
+        remove_service(SYSTEMD_PHP_FPM_NAME)
 
         self.cron.remove()
 
