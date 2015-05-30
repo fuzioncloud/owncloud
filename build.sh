@@ -8,7 +8,7 @@ VERSION=8.0.3
 ROOT=/opt
 APP_NAME=syncloud-owncloud
 APP_ROOT=${ROOT}/${APP_NAME}
-APP_DATA_ROOT=${ROOT}/data/${APP_NAME}
+APP_DATA_ROOT=${ROOT}/data/${NAME}
 PREFIX=${APP_ROOT}/${NAME}
 USER=www-data
 
