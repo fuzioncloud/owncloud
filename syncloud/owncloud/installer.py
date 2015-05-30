@@ -7,6 +7,7 @@ from os.path import isfile, join
 from subprocess import check_output
 
 import MySQLdb
+from syncloud.sam.installer import Installer as SamInstaller
 
 from syncloud.sam.manager import get_sam
 from syncloud.systemd.systemctl import remove_service, add_service
@@ -29,18 +30,11 @@ class Installer:
         self.config = Config()
         self.cron = OwncloudCron(self.config)
         self.sam = get_sam()
+        self.sam_installer = SamInstaller()
 
     def install(self):
 
-        if isfile(OWNCLOUD_ARCHIVE_TMP):
-            os.remove(OWNCLOUD_ARCHIVE_TMP)
-        arch = check_output('uname -m', shell=True).strip()
-        url = 'http://apps.syncloud.org/{0}/{1}/{2}'.format(self.sam.get_release(), arch, OWNCLOUD_ARCHIVE)
-        print("saving {0} to {1}".format(url, OWNCLOUD_ARCHIVE_TMP))
-        filename = wget.download(url, OWNCLOUD_ARCHIVE_TMP)
-
-        print("extracting {0}".format(filename))
-        tarfile.open(filename).extractall(self.config.root_path())
+        self.sam_installer.install('syncloud-owncloud')
 
         app_data_dir = app.get_data_dir('owncloud')
         app_config_dir = join(app_data_dir, 'config')
