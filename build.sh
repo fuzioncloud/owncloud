@@ -46,7 +46,8 @@ tar xzf nginx/build/nginx.tar.gz -C ${APP_ROOT}/
 
 mv ${APP_ROOT}/owncloud/config ${APP_ROOT}/owncloud/config.orig
 ln -s /opr/data/owncloud/config ${APP_ROOT}/owncloud/config
-chown -R ${USER}. /opr/data/owncloud/config
+chown -R ${USER}. ${APP_ROOT}/owncloud/config
+
 chown -R ${USER}. ${APP_ROOT}/owncloud/apps
 
 tar cpzf ${APP_NAME}.tar.gz -C ${ROOT} ${APP_NAME}
