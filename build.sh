@@ -14,13 +14,13 @@ USER=www-data
 
 ls -la
 
-if [ ! -f php/build/php.tar.gz ]; then
+if [ ! -f php/php.tar.gz ]; then
   ./php/build.sh
 else
   echo "skipping php build"
 fi
 
-if [ ! -f nginx/build/nginx.tar.gz ]; then
+if [ ! -f nginx/nginx.tar.gz ]; then
   ./nginx/build.sh
 else
   echo "skipping nginx build"
