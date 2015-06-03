@@ -5,11 +5,7 @@ cd ${DIR}
 
 NAME=owncloud
 VERSION=8.0.3
-ROOT=/opt
-APP_NAME=syncloud-owncloud
-APP_ROOT=${ROOT}/${APP_NAME}
-APP_DATA_ROOT=${ROOT}/data/${NAME}
-PREFIX=${APP_ROOT}/${NAME}
+APP_DATA_ROOT=/opt/data/${NAME}
 USER=www-data
 
 ls -la
@@ -27,31 +23,24 @@ else
 fi
 
 rm -rf build
-mkdir build
-cd build
+mkdir -p build/${NAME}
 
-wget https://download.owncloud.org/community/${NAME}-${VERSION}.tar.bz2
+wget https://download.owncloud.org/community/${NAME}-${VERSION}.tar.bz2 -O build/${NAME}-${VERSION}.tar.bz2
+tar xjf build/${NAME}-${VERSION}.tar.bz2 -C build/${NAME}/
 
-rm -rf ${APP_ROOT}
-mkdir ${APP_ROOT}
+cp -r bin build/${NAME}
+chown -R ${USER}. build/${NAME}/bin/
 
-tar xjf ${NAME}-${VERSION}.tar.bz2 -C ${APP_ROOT}/
+cp -r config build/${NAME}/
 
-cd ..
+tar xzf php/php.tar.gz -C build/${NAME}/
+tar xzf nginx/nginx.tar.gz -C build/${NAME}/
 
-cp -r bin ${APP_ROOT}/
-chown -R ${USER}. ${APP_ROOT}/bin/
+mv build/${NAME}/owncloud/config build/${NAME}/owncloud/config.orig
+ln -s ${APP_DATA_ROOT}/config build/${NAME}/owncloud/config
+chown -R ${USER}. build/${NAME}/owncloud/config
 
-cp -r config ${APP_ROOT}/
+chown -R ${USER}. build/${NAME}/owncloud/apps
 
-tar xzf php/php.tar.gz -C ${APP_ROOT}/
-tar xzf nginx/nginx.tar.gz -C ${APP_ROOT}/
-
-mv ${APP_ROOT}/owncloud/config ${APP_ROOT}/owncloud/config.orig
-ln -s ${APP_DATA_ROOT}/config ${APP_ROOT}/owncloud/config
-chown -R ${USER}. ${APP_ROOT}/owncloud/config
-
-chown -R ${USER}. ${APP_ROOT}/owncloud/apps
-
-tar cpzf ${APP_NAME}.tar.gz -C ${ROOT} ${APP_NAME}
+tar cpzf ${NAME}.tar.gz -C build/ ${NAME}
 
