@@ -14,13 +14,13 @@ USER=www-data
 
 ls -la
 
-if [ ! -d php/build ]; then
+if [ ! -f php/build/php.tar.gz ]; then
   ./php/build.sh
 else
   echo "skipping php build"
 fi
 
-if [ ! -d nginx/build ]; then
+if [ ! -f nginx/build/nginx.tar.gz ]; then
   ./nginx/build.sh
 else
   echo "skipping nginx build"
@@ -44,8 +44,8 @@ chown -R ${USER}. ${APP_ROOT}/bin/
 
 cp -r config ${APP_ROOT}/
 
-tar xzf php/build/php.tar.gz -C ${APP_ROOT}/
-tar xzf nginx/build/nginx.tar.gz -C ${APP_ROOT}/
+tar xzf php/php.tar.gz -C ${APP_ROOT}/
+tar xzf nginx/nginx.tar.gz -C ${APP_ROOT}/
 
 mv ${APP_ROOT}/owncloud/config ${APP_ROOT}/owncloud/config.orig
 ln -s ${APP_DATA_ROOT}/config ${APP_ROOT}/owncloud/config

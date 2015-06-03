@@ -51,7 +51,7 @@ make install
 cp --remove-destination /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libpng12.so* ${PREFIX}/lib
 cp --remove-destination /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libcurl-gnutls.so* ${PREFIX}/lib
 
-cd ..
-tar cpzf ${NAME}.tar.gz -C ${ROOT} ${NAME}
+cd ../..
 
-cd ..
+rm -rf ${NAME}.tar.gz
+tar cpzf ${NAME}.tar.gz -C ${ROOT} ${NAME}

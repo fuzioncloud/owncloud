@@ -26,9 +26,7 @@ cd ${NAME}-${VERSION}
 make
 rm -rf ${PREFIX}
 make install
-cd ..
+cd ../..
 
 rm -rf ${NAME}.tar.gz
 tar cpzf ${NAME}.tar.gz -C ${ROOT} ${NAME}
-
-cd ..
