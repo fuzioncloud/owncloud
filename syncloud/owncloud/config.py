@@ -3,7 +3,7 @@ from os.path import join
 from syncloud.tools.facade import Facade
 
 tools_facade = Facade()
-default_config_path = join(tools_facade.usr_local_dir(), 'syncloud-owncloud', 'config')
+default_config_path = '/opt/app/owncloud/config'
 default_config_file = join(default_config_path, 'owncloud-ctl.cfg')
 
 
@@ -15,20 +15,8 @@ class Config:
         self.filename = filename
         self.config_path = config_path
 
-    def service_name(self):
-        return self.parser.get('owncloud', 'service_name')
-
-    def port_http(self):
-        return self.parser.getint('owncloud', 'port_http')
-
-    def service_type_http(self):
-        return self.parser.get('owncloud', 'service_type_http')
-
-    def port_https(self):
-        return self.parser.getint('owncloud', 'port_https')
-
-    def service_type_https(self):
-        return self.parser.get('owncloud', 'service_type_https')
+    def port(self):
+        return self.parser.getint('owncloud', 'port')
 
     def url(self):
         return self.parser.get('owncloud', 'url')

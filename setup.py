@@ -5,7 +5,8 @@ requirements = [
     'requests',
     'beautifulsoup4',
     'syncloud-platform',
-    'MySQL-python==1.2.5'
+    'MySQL-python==1.2.5',
+    'psycopg2==2.6'
 ]
 
 version = open(join(dirname(__file__), 'version')).read().strip()
