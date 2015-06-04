@@ -1,0 +1,19 @@
+[Unit]
+Description=PostgreSQL database server
+
+[Service]
+Type=forking
+SyslogIdentifier=postgres
+PIDFile=/opt/data/owncloud/database/postmaster.pid
+
+User=postgres
+ExecStart=/opt/app/owncloud/postgresql/bin/pg_ctl -s -D /opt/data/owncloud/database start
+ExecReload=/opt/app/owncloud/postgresql/bin/pg_ctl -s -D /opt/data/owncloud/database reload
+ExecStop=/opt/app/owncloud/postgresql/bin/pg_ctl -s -D /opt/data/owncloud/database stop -m fast
+
+# Due to PostgreSQL's use of shared memory, OOM killer is often overzealous in
+# killing Postgres
+OOMScoreAdjust=-200
+
+[Install]
+WantedBy=multi-user.target
