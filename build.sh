@@ -8,8 +8,6 @@ VERSION=8.0.3
 APP_DATA_ROOT=/opt/data/${NAME}
 USER=www-data
 
-ls -la
-
 if [ ! -f php/php.tar.gz ]; then
   ./php/build.sh
 else

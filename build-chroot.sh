@@ -11,4 +11,4 @@ rm -rf rootfs
 tar xzf rootfs.tar.gz
 cp -r ./* rootfs/root
 chroot rootfs root/build.sh
-mv rootfs/root/syncloud-owncloud.tar.gz .
+mv rootfs/root/owncloud.tar.gz .
