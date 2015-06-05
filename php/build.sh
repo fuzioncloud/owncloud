@@ -7,7 +7,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 NAME=php
 VERSION=5.6.9
-ROOT=/opt/syncloud-owncloud
+ROOT=/opt/app/owncloud
 PREFIX=${ROOT}/${NAME}
 
 echo "building ${NAME}"
@@ -23,20 +23,10 @@ wget http://php.net/get/${NAME}-${VERSION}.tar.bz2/from/this/mirror -O ${NAME}-$
 tar xjf ${NAME}-${VERSION}.tar.bz2
 cd ${NAME}-${VERSION}
 
-#cd ext
-#wget http://pecl.php.net/get/APC-3.1.9.tgz
-#tar xzf APC-3.1.9.tgz
-#mv APC-3.1.9 apc
-#cd ..
-#rm configure
-#./buildconf --force
-#./configure --enable-fpm --with-mysql --enable-apc --prefix ${PREFIX} --with-config-file-path=${ROOT}/config
-
 ./configure \
     --enable-fpm \
-    --with-mysql \
-    --with-mysqli \
-    --with-pdo-mysql \
+    --with-pgsql \
+    --with-pdo-pgsql \
     --enable-opcache \
     --prefix ${PREFIX} \
     --with-config-file-path=${ROOT}/config \

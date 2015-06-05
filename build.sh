@@ -5,7 +5,9 @@ cd ${DIR}
 
 NAME=owncloud
 APP_DATA_ROOT=/opt/data/${NAME}
-USER=www-data
+USER=owncloud
+
+/usr/sbin/useradd -r -s /bin/false owncloud
 
 if [ ! -f php/php.tar.gz ]; then
   ./php/build.sh
