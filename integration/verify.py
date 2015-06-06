@@ -1,13 +1,13 @@
+from bs4 import BeautifulSoup
 import logging
 from os.path import dirname
+
 import pytest
 import requests
-
 from syncloud.app import logger
 from syncloud.insider.facade import get_insider
 from syncloud.sam.manager import get_sam
 from syncloud.sam.pip import Pip
-from syncloud.sam.platform_installer import PlatformInstaller
 from syncloud.server.serverfacade import get_server
 
 from syncloud.owncloud.installer import OwncloudInstaller
@@ -42,15 +42,21 @@ def test_owncloud_activation():
 
     setup = Setup()
     assert not setup.is_finished()
-    setup.finish('test', 'test')
+    setup.finish('test', 'test', overwritehost='localhost')
     assert setup.is_finished()
 
 def test_platform_integration():
     session = requests.session()
     response = session.get('http://localhost/owncloud', allow_redirects=False)
-    # print(response.text.encode('ascii', 'ignore'))
-    assert response.status_code == 200
-
-    response = session.post('http://localhost/owncloud', data={'name': 'user', 'password': 'password'})
     # print(response.text)
-    assert session.get('http://localhost/owncloud', allow_redirects=False).status_code == 200
+    assert response.status_code == 200
+    soup = BeautifulSoup(response.text)
+    requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
+    response = session.post('http://localhost/owncloud/index.php',
+                            data={'user': 'test', 'password': 'test', 'requesttoken': requesttoken},
+                            allow_redirects=False)
+    assert response.status_code == 302
+    # print(response.text)
+    # assert session.get('http://localhost/owncloud', allow_redirects=False).status_code == 302
+
+    assert session.get('http://localhost/owncloud/core/img/filetypes/text.png').status_code == 200

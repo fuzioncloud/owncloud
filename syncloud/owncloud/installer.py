@@ -1,9 +1,11 @@
 import os
+from os.path import join
 import shutil
 from subprocess import check_output
 import pwd
 
 import psycopg2
+from syncloud.insider.facade import get_insider
 from syncloud.sam.installer import Installer as SamInstaller
 from syncloud.sam.manager import get_sam
 from syncloud.systemd.systemctl import remove_service, add_service

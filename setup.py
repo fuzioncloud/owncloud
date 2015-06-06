@@ -22,10 +22,6 @@ setup(
         'bin/owncloud-ctl'],
     packages=['syncloud', 'syncloud.owncloud'],
     namespace_packages=['syncloud'],
-    data_files=[
-        ('syncloud-owncloud/config', ['config/owncloud-ctl.cfg']),
-        ('syncloud-owncloud/config', ['config/owncloud.conf'])
-    ],
     install_requires=requirements,
     license='GPLv3',
     author='Syncloud',

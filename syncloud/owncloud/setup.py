@@ -1,7 +1,10 @@
+from os.path import join
 import requests
 import re
 from bs4 import BeautifulSoup
+from subprocess import check_output
 from syncloud.app import logger
+from syncloud.insider.facade import get_insider
 from syncloud.owncloud.config import Config
 
 
@@ -11,7 +14,7 @@ class Setup:
         self.config = Config()
         self.index_url = 'http://localhost:{}/index.php'.format(self.config.port())
 
-    def finish(self, login, password):
+    def finish(self, login, password, overwritehost=None):
 
         if self.is_finished():
             return True
@@ -25,8 +28,10 @@ class Setup:
                                      'dbtype': 'pgsql', 'dbname': 'owncloud',
                                      'dbuser': 'owncloud', 'dbpass': 'owncloud',
                                      'dbhost': 'localhost', 'directory': self.config.data_dir()}, allow_redirects=False)
+
         if response.status_code == 302:
             self.log.info("successful login redirect")
+            self.fix_owncloud_configuration(overwritehost)
             return True
 
         if response.status_code != 200:
@@ -38,6 +43,15 @@ class Setup:
             errors = re.sub('(\n|\t)', '', errors.text)
             errors = re.sub('( +)', ' ', errors)
             raise Exception(errors)
+
+    def fix_owncloud_configuration(self, overwritehost):
+        owncloud_config_bin = join(self.config.bin_dir(), 'owncloud-config')
+        if not overwritehost:
+            info = get_insider().service_info('server')
+            overwritehost = '{0}:{1}'.format(info.external_host, info.external_port)
+        overwritewebroot = '/owncloud'
+        self.log.info("running {0} {1} {2}".format(owncloud_config_bin, overwritehost, overwritewebroot))
+        check_output([owncloud_config_bin, overwritehost, overwritewebroot])
 
     def is_finished(self,):
 
