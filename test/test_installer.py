@@ -1,10 +1,11 @@
 from os.path import dirname
 from tempfile import mkstemp
-from syncloud.owncloud.installer import lang_to_replace, fix_locale_gen
+from syncloud.owncloud.installer import fix_locale_gen
 
 test_dir = dirname(__file__)
 original_config_file = test_dir + '/data/locale.gen.original'
 expected_config_file = test_dir + '/data/locale.gen.fixed'
+
 
 def test_lang_to_replace():
 
