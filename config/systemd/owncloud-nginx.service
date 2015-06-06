@@ -4,9 +4,9 @@ Requires=owncloud-php-fpm.service
 After=owncloud-php-fpm.service
 
 [Service]
+User=owncloud
 Type=forking
 PIDFile=/opt/app/owncloud/nginx/logs/nginx.pid
-#RootDirectory=/opt/app/owncloud/nginx
 ExecStartPre=/opt/app/owncloud/nginx/sbin/nginx -t -c /opt/app/owncloud/config/nginx.conf
 ExecStart=/opt/app/owncloud/nginx/sbin/nginx -c /opt/app/owncloud/config/nginx.conf
 ExecReload=/opt/app/owncloud/nginx/sbin/nginx -c /opt/app/owncloud/config/nginx.conf -s reload

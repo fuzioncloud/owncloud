@@ -51,9 +51,9 @@ tar xzf postgresql/postgresql.tar.gz -C build/${NAME}/
 
 mv build/${NAME}/owncloud/config build/${NAME}/owncloud/config.orig
 ln -s ${APP_DATA_ROOT}/config build/${NAME}/owncloud/config
-chown -R ${USER}. build/${NAME}/owncloud/config
-
-chown -R ${USER}. build/${NAME}/owncloud/apps
+#chown -R ${USER}. build/${NAME}/owncloud/config
+#chown -R ${USER}. build/${NAME}/owncloud/apps
+chown -R ${USER}. build/${NAME}
 
 echo "zipping"
 
