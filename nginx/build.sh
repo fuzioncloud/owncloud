@@ -8,7 +8,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 NAME=nginx
 VERSION=1.8.0
-ROOT=/opt/syncloud-owncloud
+ROOT=/opt/app/owncloud
 PREFIX=${ROOT}/${NAME}
 
 echo "building ${NAME}"

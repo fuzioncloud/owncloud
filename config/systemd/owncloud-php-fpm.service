@@ -1,13 +1,13 @@
 [Unit]
 Description=ownCloud php fpm
-Requires=network.target
-After=network.target
+Requires=owncloud-postgresql.service
+After=owncloud-postgresql.service
 
 [Service]
 Type=forking
-PIDFile=/opt/syncloud-owncloud/php/var/run/php-fpm.pid
-ExecStart=/opt/syncloud-owncloud/php/sbin/php-fpm -y /opt/syncloud-owncloud/config/php-fpm.conf -c /opt/syncloud-owncloud/config/php.ini
-Environment=LD_LIBRARY_PATH=/opt/syncloud-owncloud/php/lib
+PIDFile=/opt/app/owncloud/php/var/run/php-fpm.pid
+ExecStart=/opt/app/owncloud/php/sbin/php-fpm -y /opt/app/owncloud/config/php-fpm.conf -c /opt/app/owncloud/config/php.ini
+Environment=LD_LIBRARY_PATH=/opt/app/owncloud/php/lib
 RemainAfterExit=yes
 
 [Install]

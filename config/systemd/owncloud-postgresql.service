@@ -1,13 +1,16 @@
 [Unit]
 Description=PostgreSQL database server
+Requires=network.target
+After=network.target
 
 [Service]
 Type=forking
 SyslogIdentifier=postgres
 PIDFile=/opt/data/owncloud/database/postmaster.pid
 
-User=postgres
-ExecStart=/opt/app/owncloud/postgresql/bin/pg_ctl -s -D /opt/data/owncloud/database start
+User=owncloud
+ExecStartPre=/opt/app/owncloud/bin/initdb
+ExecStart=/opt/app/owncloud/postgresql/bin/pg_ctl -w -s -D /opt/data/owncloud/database start
 ExecReload=/opt/app/owncloud/postgresql/bin/pg_ctl -s -D /opt/data/owncloud/database reload
 ExecStop=/opt/app/owncloud/postgresql/bin/pg_ctl -s -D /opt/data/owncloud/database stop -m fast
 

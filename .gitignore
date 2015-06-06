@@ -3,3 +3,7 @@ dist
 *.pyc
 *.egg-info
 build
+*.tar.gz
+*.tar.bz2
+rootfs
+install
