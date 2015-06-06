@@ -4,7 +4,7 @@ APP_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
 cd ${APP_DIR}
 
 if [[ -n "$1" ]]; then
-    export TEAMCITY_VERSION=$3
+    export TEAMCITY_VERSION=$1
 fi
 
 #Fix debconf frontend warnings
