@@ -3,10 +3,8 @@
 APP_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
 cd ${APP_DIR}
 
-echo $1
-
-if [[ -n "$1" ]]; then
-    export TEAMCITY_VERSION=$1
+if [[ -n "$3" ]]; then
+    export TEAMCITY_VERSION=$3
 fi
 
 #Fix debconf frontend warnings
@@ -30,4 +28,4 @@ echo "installing local pip build"
 python setup.py sdist
 pip2 install --no-binary :all: dist/syncloud-owncloud-*.tar.gz
 
-py.test -s integration/verify.py
+py.test -s integration/verify.py --email=$1 --password=$2

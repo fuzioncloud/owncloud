@@ -8,6 +8,11 @@ if [ ! -f rootfs.tar.gz ]; then
   exit 1
 fi
 
+if [[ -z "$1" || -z "$2" ]]; then
+    echo "usage $0 redirect_user redirect_password"
+    exit 1
+fi
+
 apt-get install docker.io sshpass
 service docker start
 
@@ -54,4 +59,4 @@ sleep 3
 echo "running tests"
 ssh-keygen -f "/root/.ssh/known_hosts" -R [localhost]:2222
 
-sshexec "/test/integration/test.sh \"$TEAMCITY_VERSION\""
+sshexec "/test/integration/test.sh $1 $2 \"$TEAMCITY_VERSION\""
