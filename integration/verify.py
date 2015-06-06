@@ -1,6 +1,7 @@
 import logging
 from os.path import dirname
 import pytest
+import requests
 
 from syncloud.app import logger
 from syncloud.insider.facade import get_insider
@@ -33,7 +34,7 @@ def activate_device(auth):
     server.activate('test', 'syncloud.info', 'http://api.syncloud.info:81', email, password, 'teamcity', 'user', 'password', False)
 
 
-def test_owncloud():
+def test_owncloud_activation():
     logger.init(logging.DEBUG, True)
 
     print("installing local owncloud build")
@@ -43,3 +44,13 @@ def test_owncloud():
     assert not setup.is_finished()
     setup.finish('test', 'test')
     assert setup.is_finished()
+
+def test_platform_integration():
+    session = requests.session()
+    response = session.get('http://localhost/owncloud', allow_redirects=False)
+    # print(response.text.encode('ascii', 'ignore'))
+    assert response.status_code == 200
+
+    response = session.post('http://localhost/owncloud', data={'name': 'user', 'password': 'password'})
+    # print(response.text)
+    assert session.get('http://localhost/owncloud', allow_redirects=False).status_code == 200

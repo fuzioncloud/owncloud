@@ -35,7 +35,8 @@ cd ${NAME}-${VERSION}
     --with-gd \
     --enable-zip \
     --with-zlib \
-    --with-curl
+    --with-curl \
+    --with-readline
 make -j2
 rm -rf ${PREFIX}
 make install
