@@ -8,7 +8,8 @@ from syncloud.owncloud.config import Config
 class Setup:
     def __init__(self):
         self.log = logger.get_logger('owncloud.setup.finish')
-        self.index_url = 'http://localhost:{}/index.php'.format(Config().port())
+        self.config = Config()
+        self.index_url = 'http://localhost:{}/index.php'.format(self.config.port())
 
     def finish(self, login, password):
 
@@ -21,9 +22,9 @@ class Setup:
                                  data={
                                      'install': 'true', 'adminlogin': login,
                                      'adminpass': password, 'adminpass-clone': password,
-                                     'dbtype': 'mysql', 'dbname': 'owncloud',
-                                     'dbuser': 'root', 'dbpass': 'root',
-                                     'dbhost': 'localhost', 'directory': '/data'}, allow_redirects=False)
+                                     'dbtype': 'pgsql', 'dbname': 'owncloud',
+                                     'dbuser': 'owncloud', 'dbpass': 'owncloud',
+                                     'dbhost': 'localhost', 'directory': self.config.data_dir()}, allow_redirects=False)
         if response.status_code == 302:
             self.log.info("successful login redirect")
             return True

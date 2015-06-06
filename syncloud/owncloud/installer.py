@@ -39,26 +39,20 @@ class OwncloudInstaller:
         except KeyError:
             check_output(['/usr/sbin/useradd', '-r', '-s', '/bin/false', 'owncloud', '--home', config.data_dir()])
 
-        cron = OwncloudCron(config)
-
-        app_data_dir = app.get_data_dir('owncloud')
-
         lang = os.environ['LANG']
         if lang not in check_output(['locale', '-a']):
+            print("generating locale: {0}".format(lang))
             fix_locale_gen(lang)
             check_output('locale-gen')
 
-        app_config_dir = join(app_data_dir, 'config')
-        print("checking app config folder: {0}".format(app_config_dir))
-        if not os.path.isdir(app_config_dir):
-            print("creating app config folder")
-            os.mkdir(app_config_dir)
-        else:
-            print("app config folder already exists")
+        app_data_dir = app.get_data_dir('owncloud')
+        os.chown(app_data_dir, getpwnam('owncloud').pw_uid, getgrnam('owncloud').gr_gid)
 
-        os.chown(app_config_dir, getpwnam('owncloud').pw_uid, getgrnam('owncloud').gr_gid)
+        self.create_dir(app_data_dir, 'config', 'owncloud')
+        self.create_dir(app_data_dir, 'data', 'owncloud')
 
         print("setup crontab task")
+        cron = OwncloudCron(config)
         cron.create()
 
         print("setup systemd")
@@ -75,6 +69,16 @@ class OwncloudInstaller:
 
         add_service(config.install_path(), SYSTEMD_PHP_FPM_NAME)
         add_service(config.install_path(), SYSTEMD_NGINX_NAME)
+
+    def create_dir(self, app_data_dir, dir_name, user):
+        data_dir = join(app_data_dir, dir_name)
+        print("checking app config folder: {0}".format(data_dir))
+        if not os.path.isdir(data_dir):
+            print("creating app data dir: {0}".format(data_dir))
+            os.mkdir(data_dir)
+            os.chown(data_dir, getpwnam(user).pw_uid, getgrnam(user).gr_gid)
+        else:
+            print("app data dir exists: {0}".format(data_dir))
 
     def remove(self):
 
