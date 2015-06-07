@@ -68,7 +68,7 @@ class OwncloudInstaller:
     def remove(self):
 
         config = Config()
-        Nginx().add_app('owncloud', config.port())
+        Nginx().remove_app('owncloud')
         cron = OwncloudCron(config)
         remove_service(SYSTEMD_NGINX_NAME)
         remove_service(SYSTEMD_PHP_FPM_NAME)

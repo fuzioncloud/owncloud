@@ -5,6 +5,4 @@ import logging
 
 if __name__ == '__main__':
     logger.init(logging.DEBUG, console=True, line_format='%(message)s')
-    installer = OwncloudInstaller()
-    installer.remove()
-    installer.install()
+    OwncloudInstaller().install()
