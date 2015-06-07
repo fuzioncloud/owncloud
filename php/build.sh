@@ -15,7 +15,7 @@ echo "building ${NAME}"
 apt-get -y install build-essential \
     libxml2-dev autoconf libjpeg-dev libpng12-dev libfreetype6-dev \
     libzip2 libzip-dev zlib1g-dev libcurl4-gnutls-dev dpkg-dev \
-    libpq-dev
+    libpq-dev libreadline-dev
 
 rm -rf build
 mkdir -p build
