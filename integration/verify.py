@@ -4,12 +4,8 @@ from os.path import dirname
 
 import pytest
 import requests
-from syncloud.app import logger
-from syncloud.insider.facade import get_insider
-from syncloud.sam.manager import get_sam
-from syncloud.sam.pip import Pip
-from syncloud.server.serverfacade import get_server
 
+from syncloud.app import logger
 from syncloud.owncloud.installer import OwncloudInstaller
 from syncloud.owncloud.setup import Setup
 
@@ -20,18 +16,13 @@ def activate_device(auth):
 
     logger.init(logging.DEBUG, True)
 
-    print("installing latest platform")
-    get_sam().update("0.9")
-    get_sam().install("syncloud-platform")
-    # PlatformInstaller().install()
-    Pip(None).log_version('syncloud-platform')
-
-    # persist upnp mock setting
-    get_insider().insider_config.set_upnpc_mock(True)
-
-    server = get_server(insider=get_insider(use_upnpc_mock=True))
     email, password = auth
-    server.activate(email, password, 'teamcity', 'user', 'password', 'http://api.syncloud.info:81', 'syncloud.info')
+
+    response = requests.post('http://localhost:81/server/rest/activate',
+                             data={'redirect-email': email, 'redirect-password': password,
+                                   'redirect-domain': 'teamcity', 'name': 'user', 'password': 'password',
+                                   'api-url': 'http://api.syncloud.info:81', 'domain': 'syncloud.info'})
+    assert response.status_code == 200
 
 
 def test_owncloud_activation():
