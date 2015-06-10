@@ -7,8 +7,6 @@ NAME=owncloud
 APP_DATA_ROOT=/opt/data/${NAME}
 USER=owncloud
 
-/usr/sbin/useradd -r -s /bin/false owncloud
-
 if [ ! -f php/php.tar.gz ]; then
   ./php/build.sh
 else
@@ -51,12 +49,8 @@ tar xzf postgresql/postgresql.tar.gz -C build/${NAME}/
 
 mv build/${NAME}/owncloud/config build/${NAME}/owncloud/config.orig
 ln -s ${APP_DATA_ROOT}/config build/${NAME}/owncloud/config
-#chown -R ${USER}. build/${NAME}/owncloud/config
-#chown -R ${USER}. build/${NAME}/owncloud/apps
-chown -R ${USER}. build/${NAME}
 
 echo "zipping"
-
 tar cpzf ${NAME}.tar.gz -C build/ ${NAME}
 
 echo "app: ${NAME}.tar.gz"
