@@ -39,7 +39,7 @@ echo "packaging"
 tar xjf owncloud/owncloud.tar.bz2 -C build/${NAME}/
 
 cp -r bin build/${NAME}
-chown -R ${USER}. build/${NAME}/bin/
+#chown -R ${USER}. build/${NAME}/bin/
 
 cp -r config build/${NAME}/
 

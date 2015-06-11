@@ -28,9 +28,6 @@ def activate_device(auth):
 def test_owncloud_activation():
     logger.init(logging.DEBUG, True)
 
-    print("installing local owncloud build")
-    OwncloudInstaller().install('owncloud.tar.gz')
-
     setup = Setup()
     assert not setup.is_finished()
     setup.finish('test', 'test', overwritehost='localhost')
