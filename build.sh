@@ -3,33 +3,35 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
+export TMPDIR=/tmp
+export TMP=/tmp
 NAME=owncloud
 APP_DATA_ROOT=/opt/data/${NAME}
 USER=owncloud
 
-if [ ! -f php/php.tar.gz ]; then
-  ./php/build.sh
-else
-  echo "skipping php build"
+ARCH=x86_64
+if [[ -n "$1" ]]; then
+    ARCH=$1
 fi
 
-if [ ! -f nginx/nginx.tar.gz ]; then
-  ./nginx/build.sh
-else
-  echo "skipping nginx build"
-fi
+function 3rdparty {
+  APP=$1
+  if [ ! -d 3rdparty ]; then
+    mkdir 3rdparty
+  fi
+  cd 3rdparty
+  if [ ! -f ${APP}-${ARCH}.tar.gz ]; then
+    wget http://build.syncloud.org:8111/guestAuth/repository/download/thirdparty_${APP}_${ARCH}/lastSuccessful/${APP}.tar.gz\
+    -O ${APP}-${ARCH}.tar.gz --progress dot:giga
+  else
+    echo "skipping ${APP}"
+  fi
+  cd ..
+}
 
-if [ ! -f postgresql/postgresql.tar.gz ]; then
-  ./postgresql/build.sh
-else
-  echo "skipping postgresql build"
-fi
-
-if [ ! -f owncloud/owncloud.tar.bz2 ]; then
-  ./owncloud/build.sh
-else
-  echo "skipping owncloud build"
-fi
+3rdparty php
+3rdparty nginx
+3rdparty postgresql
 
 rm -rf build
 mkdir -p build/${NAME}
@@ -39,13 +41,11 @@ echo "packaging"
 tar xjf owncloud/owncloud.tar.bz2 -C build/${NAME}/
 
 cp -r bin build/${NAME}
-#chown -R ${USER}. build/${NAME}/bin/
-
 cp -r config build/${NAME}/
 
-tar xzf php/php.tar.gz -C build/${NAME}/
-tar xzf nginx/nginx.tar.gz -C build/${NAME}/
-tar xzf postgresql/postgresql.tar.gz -C build/${NAME}/
+tar xzf 3rdparty/php-${ARCH}.tar.gz -C build/${NAME}/
+tar xzf 3rdparty/nginx-${ARCH}.tar.gz -C build/${NAME}/
+tar xzf 3rdparty/postgresql-${ARCH}.tar.gz -C build/${NAME}/
 
 mv build/${NAME}/owncloud/config build/${NAME}/owncloud/config.orig
 ln -s ${APP_DATA_ROOT}/config build/${NAME}/owncloud/config
