@@ -33,6 +33,12 @@ function 3rdparty {
 3rdparty nginx
 3rdparty postgresql
 
+if [ ! -f owncloud/owncloud.tar.bz2 ]; then
+  ./owncloud/build.sh
+else
+  echo "skipping owncloud build"
+fi
+
 rm -rf build
 mkdir -p build/${NAME}
 
