@@ -5,7 +5,6 @@ from subprocess import check_output
 import psycopg2
 
 from syncloud.sam.installer import Installer as SamInstaller
-from syncloud.sam.manager import get_sam
 from syncloud.systemd.systemctl import remove_service, add_service
 from syncloud.tools import app
 from syncloud.tools.nginx import Nginx
@@ -19,7 +18,6 @@ SYSTEMD_POSTGRESQL = 'owncloud-postgresql'
 
 class OwncloudInstaller:
     def __init__(self):
-        self.sam = get_sam()
         self.sam_installer = SamInstaller()
 
     def install(self, from_file=None):
