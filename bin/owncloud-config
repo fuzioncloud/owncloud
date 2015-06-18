@@ -2,15 +2,10 @@
 <?php
 require_once '/opt/app/owncloud/owncloud/lib/base.php';
 
-function set($name, $value) {
-    echo("setting ".$name." = ".$value."\n");
-    \OC::$server->getConfig()->setSystemValue($name, $value);
-}
-
 if ($argc > 1) {
-    set('overwritehost', $argv[1]);
-    set('overwritewebroot', $argv[2]);
+    echo("setting ".$argv[1]." = ".$argv[2]."\n");
+    \OC::$server->getConfig()->setSystemValue($argv[1], $argv[2]);
 } else {
-    echo("usage: ".$argv[0]." overwritehost overwritewebroot\n");
+    echo("usage: ".$argv[0]." key value\n");
     exit(1);
 }

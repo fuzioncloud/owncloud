@@ -2,35 +2,30 @@ from bs4 import BeautifulSoup
 import logging
 from os.path import dirname
 
-import pytest
 import requests
 
 from syncloud.app import logger
-from syncloud.owncloud.installer import OwncloudInstaller
 from syncloud.owncloud.setup import Setup
 
 DIR = dirname(__file__)
 
-@pytest.fixture(scope="session", autouse=True)
-def activate_device(auth):
+def test_activate_device(auth):
 
-    logger.init(logging.DEBUG, True)
-
-    email, password = auth
-
+    email, password, domain = auth
+    release = open('{0}/RELEASE'.format(DIR), 'r').read().strip()
     response = requests.post('http://localhost:81/server/rest/activate',
                              data={'redirect-email': email, 'redirect-password': password,
-                                   'redirect-domain': 'teamcity', 'name': 'user', 'password': 'password',
-                                   'api-url': 'http://api.syncloud.info:81', 'domain': 'syncloud.info'})
+                                   'redirect-domain': domain, 'name': 'user', 'password': 'password',
+                                   'api-url': 'http://api.syncloud.info:81', 'domain': 'syncloud.info',
+                                   'release': release})
     assert response.status_code == 200
-
 
 def test_owncloud_activation():
     logger.init(logging.DEBUG, True)
 
     setup = Setup()
     assert not setup.is_finished()
-    setup.finish('test', 'test', overwritehost='localhost')
+    setup.finish('test', 'test')
     assert setup.is_finished()
 
 def test_platform_integration():

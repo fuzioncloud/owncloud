@@ -2,9 +2,7 @@ from os.path import join
 import requests
 import re
 from bs4 import BeautifulSoup
-from subprocess import check_output
 from syncloud.app import logger
-from syncloud.insider.facade import get_insider
 from syncloud.owncloud.config import Config
 
 
@@ -12,9 +10,9 @@ class Setup:
     def __init__(self):
         self.log = logger.get_logger('owncloud.setup.finish')
         self.config = Config()
-        self.index_url = 'http://localhost:{}/index.php'.format(self.config.port())
+        self.index_url = 'http://localhost:{}/owncloud/index.php'.format(self.config.port())
 
-    def finish(self, login, password, overwritehost=None):
+    def finish(self, login, password):
 
         if self.is_finished():
             return True
@@ -31,7 +29,7 @@ class Setup:
 
         if response.status_code == 302:
             self.log.info("successful login redirect")
-            self.fix_owncloud_configuration(overwritehost)
+            # self.fix_owncloud_configuration(overwritehost)
             return True
 
         if response.status_code != 200:
@@ -44,14 +42,14 @@ class Setup:
             errors = re.sub('( +)', ' ', errors)
             raise Exception(errors)
 
-    def fix_owncloud_configuration(self, overwritehost):
-        owncloud_config_bin = join(self.config.bin_dir(), 'owncloud-config')
-        if not overwritehost:
-            info = get_insider().service_info('server')
-            overwritehost = '{0}:{1}'.format(info.external_host, info.external_port)
-        overwritewebroot = '/owncloud'
-        self.log.info("running {0} {1} {2}".format(owncloud_config_bin, overwritehost, overwritewebroot))
-        check_output([owncloud_config_bin, overwritehost, overwritewebroot])
+    # def fix_owncloud_configuration(self, overwritehost):
+    #     owncloud_config_bin = join(self.config.bin_dir(), 'owncloud-config')
+    #     if not overwritehost:
+    #         info = get_insider().service_info('server')
+    #         overwritehost = '{0}:{1}'.format(info.external_host, info.external_port)
+    #     overwritewebroot = '/owncloud'
+    #     check_output([owncloud_config_bin, 'overwritehost', overwritehost])
+    #     check_output([owncloud_config_bin, 'overwritewebroot', overwritewebroot])
 
     def is_finished(self,):
 
