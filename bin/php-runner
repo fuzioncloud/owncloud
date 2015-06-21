@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
-export LD_LIBRARY_PATH=/opt/app/owncloud/php/lib
-/opt/app/owncloud/php/bin/php $@
+APP_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
+export LD_LIBRARY_PATH=${APP_DIR}/php/lib
+/opt/app/owncloud/php/bin/php -c ${APP_DIR}/config/php.ini $@
