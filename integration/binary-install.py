@@ -7,7 +7,3 @@ from syncloud.owncloud.installer import OwncloudInstaller
 
 APP_DIR = abspath(join(dirname(__file__), '..'))
 
-logger.init(logging.DEBUG, True)
-
-print("installing local binary build")
-OwncloudInstaller().install(join(APP_DIR, 'owncloud.tar.gz'))

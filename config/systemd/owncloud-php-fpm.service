@@ -6,7 +6,7 @@ After=owncloud-postgresql.service
 [Service]
 User=owncloud
 Type=forking
-PIDFile=/opt/app/owncloud/php/var/run/php-fpm.pid
+PIDFile=/opt/data/owncloud/php-fpm.pid
 ExecStart=/opt/app/owncloud/php/sbin/php-fpm -y /opt/app/owncloud/config/php-fpm.conf -c /opt/app/owncloud/config/php.ini
 Environment=LD_LIBRARY_PATH=/opt/app/owncloud/php/lib
 RemainAfterExit=yes
