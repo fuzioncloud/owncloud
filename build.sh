@@ -1,62 +1,94 @@
-#!/usr/bin/env bash
+#!/bin/bash -x
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-cd ${DIR}
 
 export TMPDIR=/tmp
 export TMP=/tmp
+
 NAME=owncloud
+OWNCLOUD_VERSION=8.0.3
+
+ARCHITECTURE=$(dpkg-architecture -qDEB_HOST_GNU_CPU)
+if [ ! -z "$1" ]; then
+    ARCHITECTURE=$1
+fi
+
+VERSION="local"
+if [ ! -z "$2" ]; then
+    VERSION=$2
+fi
+
+
 APP_DATA_ROOT=/opt/data/${NAME}
 USER=owncloud
 
-ARCH=x86_64
-if [[ -n "$1" ]]; then
-    ARCH=$1
-fi
+cd ${DIR}
 
 function 3rdparty {
-  APP=$1
-  if [ ! -d 3rdparty ]; then
-    mkdir 3rdparty
+  APP_ID=$1
+  APP_FILE=$2
+  if [ ! -d ${DIR}/3rdparty ]; then
+    mkdir ${DIR}/3rdparty
   fi
-  cd 3rdparty
-  if [ ! -f ${APP}-${ARCH}.tar.gz ]; then
-    wget http://build.syncloud.org:8111/guestAuth/repository/download/thirdparty_${APP}_${ARCH}/lastSuccessful/${APP}.tar.gz\
-    -O ${APP}-${ARCH}.tar.gz --progress dot:giga
+  if [ ! -f ${DIR}/3rdparty/${APP_FILE} ]; then
+    wget http://build.syncloud.org:8111/guestAuth/repository/download/thirdparty_${APP_ID}_${ARCHITECTURE}/lastSuccessful/${APP_FILE} \
+    -O ${DIR}/3rdparty/${APP_FILE} --progress dot:giga
   else
-    echo "skipping ${APP}"
+    echo "skipping ${APP_ID}"
   fi
-  cd ..
 }
 
-3rdparty php
-3rdparty nginx
-3rdparty postgresql
+OWNCLOUD_ZIP=owncloud.tar.bz2
+PHP_ZIP=php.tar.gz
+NGINX_ZIP=nginx.tar.gz
+POSTGRESQL_ZIP=postgresql.tar.gz
+PYTHON_ZIP=python.tar.gz
 
-if [ ! -f owncloud/owncloud.tar.bz2 ]; then
-  ./owncloud/build.sh
+3rdparty php ${PHP_ZIP}
+3rdparty nginx ${NGINX_ZIP}
+3rdparty postgresql ${POSTGRESQL_ZIP}
+3rdparty python ${PYTHON_ZIP}
+
+if [ ! -f 3rdparty/${OWNCLOUD_ZIP} ]; then
+    wget -O 3rdparty/${OWNCLOUD_ZIP} https://download.owncloud.org/community/${NAME}-${OWNCLOUD_VERSION}.tar.bz2
 else
   echo "skipping owncloud build"
 fi
 
+rm -f src/version
+echo ${VERSION} >> src/version
+cd src
+python setup.py sdist
+cd ..
+
 rm -rf build
 mkdir -p build/${NAME}
+cd build/${NAME}
 
 echo "packaging"
 
-tar xjf owncloud/owncloud.tar.bz2 -C build/${NAME}/
+tar -xzf ${DIR}/3rdparty/${PYTHON_ZIP}
+PYTHON_PATH='python/bin'
 
-cp -r bin build/${NAME}
-cp -r config build/${NAME}/
+wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py
+${PYTHON_PATH}/python get-pip.py
+rm get-pip.py
 
-tar xzf 3rdparty/php-${ARCH}.tar.gz -C build/${NAME}/
-tar xzf 3rdparty/nginx-${ARCH}.tar.gz -C build/${NAME}/
-tar xzf 3rdparty/postgresql-${ARCH}.tar.gz -C build/${NAME}/
+${PYTHON_PATH}/pip install wheel
+${PYTHON_PATH}/pip install ${DIR}/src/dist/syncloud-owncloud-${VERSION}.tar.gz
 
-mv build/${NAME}/owncloud/config build/${NAME}/owncloud/config.orig
-ln -s ${APP_DATA_ROOT}/config build/${NAME}/owncloud/config
+tar -xjf ${DIR}/3rdparty/${OWNCLOUD_ZIP}
+tar -xzf ${DIR}/3rdparty/${PHP_ZIP}
+tar -xzf ${DIR}/3rdparty/${NGINX_ZIP}
+tar -xzf ${DIR}/3rdparty/${POSTGRESQL_ZIP}
+
+cp -r ${DIR}/bin .
+cp -r ${DIR}/config .
+
+mv owncloud/config owncloud/config.orig
+ln -s ${APP_DATA_ROOT}/config owncloud/config
+
+cd ../..
 
 echo "zipping"
 tar cpzf ${NAME}.tar.gz -C build/ ${NAME}
-
-echo "app: ${NAME}.tar.gz"
