@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-
+ROOTFS=/tmp/rootfs
 APP_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
 cd ${APP_DIR}
 if [[ $EUID -ne 0 ]]; then
@@ -10,14 +10,12 @@ fi
 
 ARCH=$(dpkg-architecture -q DEB_HOST_GNU_CPU)
 
-cd 3rdparty
-if [ ! -f rootfs-${ARCH}.tar.gz ]; then
+if [ ! -f 3rdparty/rootfs-${ARCH}.tar.gz ]; then
   wget http://build.syncloud.org:8111/guestAuth/repository/download/debian_rootfs_syncloud_${ARCH}/lastSuccessful/rootfs.tar.gz\
-  -O rootfs-${ARCH}.tar.gz --progress dot:giga
+  -O 3rdparty/rootfs-${ARCH}.tar.gz --progress dot:giga
 else
   echo "skipping rootfs"
 fi
-cd ..
 
 apt-get install docker.io
 service docker start
@@ -41,22 +39,24 @@ function cleanup {
 cleanup
 
 echo "extracting rootfs"
-tar xzf ${APP_DIR}/3rdparty/rootfs-${ARCH}.tar.gz -C /tmp
+rm -rf ${ROOTFS}
+mkdir ${ROOTFS}
+tar xzf ${APP_DIR}/3rdparty/rootfs-${ARCH}.tar.gz -C ${ROOTFS}
 
 #echo "rootfs version: $(<rootfs/version)"
-sed -i 's/Port 22/Port 2222/g' /tmp/rootfs/etc/ssh/sshd_config
-mkdir /tmp/rootfs/test
+sed -i 's/Port 22/Port 2222/g' ${ROOTFS}/etc/ssh/sshd_config
+mkdir ${ROOTFS}/test
 
 echo "copying all files to rootfs"
-rsync -a ${APP_DIR}/ /tmp/rootfs/test --exclude /build --exclude /owncloud --exclude /dist --exclude=/3rdparty
+rsync -a ${APP_DIR}/ ${ROOTFS}/test --exclude /build --exclude /owncloud --exclude /dist --exclude=/3rdparty
 
 echo "importing rootfs"
-tar -C /tmp/rootfs -c . | docker import - syncloud
+tar -C ${ROOTFS} -c . | docker import - syncloud
 
 echo "starting rootfs"
 docker run --net host -v /var/run/dbus:/var/run/dbus --name rootfs --privileged -d -it syncloud /sbin/init
 
 echo "sleeping for services to start"
-sleep 5
+sleep 10
 
 ssh-keygen -f "/root/.ssh/known_hosts" -R [localhost]:2222

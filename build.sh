@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
@@ -86,9 +86,12 @@ cp -r ${DIR}/bin .
 cp -r ${DIR}/config .
 
 mv owncloud/config owncloud/config.orig
-ln -s ${APP_DATA_ROOT}/config owncloud/config
 
 cd ../..
 
+mkdir build/${NAME}/META
+echo ${NAME} >> build/${NAME}/META/app
+echo ${VERSION} >> build/${NAME}/META/version
+
 echo "zipping"
-tar cpzf ${NAME}.tar.gz -C build/ ${NAME}
+tar cpzf ${NAME}-${VERSION}-${ARCHITECTURE}.tar.gz -C build/ ${NAME}

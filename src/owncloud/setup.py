@@ -1,9 +1,8 @@
-from os.path import join
 import requests
 import re
 from bs4 import BeautifulSoup
 from syncloud.app import logger
-from syncloud.owncloud.config import Config
+from owncloud.config import Config
 
 
 class Setup:

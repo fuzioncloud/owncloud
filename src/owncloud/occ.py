@@ -1,5 +1,5 @@
 from subprocess import check_output
-from syncloud.owncloud.config import Config
+from owncloud.config import Config
 from syncloud.app import logger
 
 

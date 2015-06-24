@@ -1,8 +1,6 @@
 from ConfigParser import ConfigParser
 from os.path import join
-from syncloud.tools.facade import Facade
 
-tools_facade = Facade()
 default_config_path = '/opt/app/owncloud/config'
 default_config_file = join(default_config_path, 'owncloud-ctl.cfg')
 
@@ -47,3 +45,10 @@ class Config:
 
     def root_path(self):
         return self.parser.get('owncloud', 'root_path')
+
+    def psql(self):
+        return self.parser.get('owncloud', 'psql')
+
+    def owncloud_config_link(self):
+        return self.parser.get('owncloud', 'owncloud_config_link')
+

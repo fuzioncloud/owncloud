@@ -1,12 +1,7 @@
 from bs4 import BeautifulSoup
-import logging
 from os.path import dirname, join, abspath
 
 import requests
-
-from syncloud.app import logger
-import time
-from syncloud.owncloud.installer import OwncloudInstaller
 
 DIR = dirname(__file__)
 APP_DIR = abspath(join(DIR, '..'))
@@ -22,11 +17,6 @@ def test_activate_device(auth):
                                    'api-url': 'http://api.syncloud.info:81', 'domain': 'syncloud.info',
                                    'release': release})
     assert response.status_code == 200
-
-def test_owncloud_install():
-    logger.init(logging.DEBUG, True)
-    OwncloudInstaller().install(join(APP_DIR, 'owncloud.tar.gz'))
-    time.sleep(3)
 
 def test_visible_through_platform():
     session = requests.session()

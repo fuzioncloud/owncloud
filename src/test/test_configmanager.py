@@ -1,6 +1,6 @@
 from os.path import dirname
 
-from syncloud.owncloud.configmanager import ConfigManager
+from owncloud.configmanager import ConfigManager
 
 test_dir = dirname(__file__)
 temp_config_file = test_dir + '/data/config.php'

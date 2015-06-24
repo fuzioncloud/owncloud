@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 APP_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )"  && cd .. && pwd )
-cd ${APP_DIR}
+cd ${APP_DIR}/src
+
+PYTHON_DIR=/opt/app/platform/python
 
 echo "insalling test dependencies"
-pip2 install -U pytest
-pip2 install -r dev_requirements.txt
+${PYTHON_DIR}/bin/python ${PYTHON_DIR}/bin/pip2 install -U pytest
+${PYTHON_DIR}/bin/python ${PYTHON_DIR}/bin/pip2 install -r dev_requirements.txt
 
 echo "installing in develop mode to run unit tests"
-pip2 install -e .
-py.test --cov syncloud test
-python setup.py develop --uninstall
+${PYTHON_DIR}/bin/py.test --cov syncloud test

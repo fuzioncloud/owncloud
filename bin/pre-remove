@@ -1,0 +1,3 @@
+sys.path.append('/opt/app/owncloud/python/lib/python2.7/site-packages')
+from syncloud.owncloud.installer import OwncloudInstaller
+OwncloudInstaller().remove()

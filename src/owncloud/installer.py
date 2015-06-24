@@ -3,19 +3,17 @@ import shutil
 from subprocess import check_output
 import uuid
 from syncloud.app import logger
-
-import psycopg2
-
-from syncloud.sam.installer import Installer as SamInstaller
 from syncloud.systemd.systemctl import remove_service, add_service
 from syncloud.tools import app
 from syncloud.tools.nginx import Nginx
-import time
-from syncloud.owncloud import postgres
-from syncloud.owncloud.config import Config
-from syncloud.owncloud.cron import OwncloudCron
-from syncloud.owncloud.occ import occ
-from syncloud.owncloud.setup import Setup
+from os.path import isdir, join
+import massedit
+import pwd
+from owncloud import postgres
+from owncloud.config import Config
+from owncloud.cron import OwncloudCron
+from owncloud.occ import occ
+from owncloud.setup import Setup
 
 SYSTEMD_NGINX_NAME = 'owncloud-nginx'
 SYSTEMD_PHP_FPM_NAME = 'owncloud-php-fpm'
@@ -26,16 +24,29 @@ INSTALL_USER = 'installer'
 class OwncloudInstaller:
     def __init__(self):
         self.log = logger.get_logger('owncloud.installer')
-        self.sam_installer = SamInstaller()
 
-    def install(self, from_file=None):
+    def install(self):
 
-        self.sam_installer.install('owncloud', from_file, 'owncloud')
         config = Config()
 
-        app_data_dir = app.get_app_data_root('owncloud', 'owncloud')
+        if 'LANG' in os.environ:
+            lang = os.environ['LANG']
+            if lang not in check_output(['locale', '-a']):
+                print("generating locale: {0}".format(lang))
+                fix_locale_gen(lang)
+                check_output('locale-gen')
 
-        app.create_data_dir(app_data_dir, 'config', 'owncloud')
+        try:
+            pwd.getpwnam(config.cron_user())
+        except KeyError:
+            self.log.info(check_output('/usr/sbin/useradd -r -s /bin/false {0}'.format(config.cron_user()), shell=True))
+        self.log.info(check_output('chown -R {0}. {1}'.format(config.cron_user(), config.install_path()), shell=True))
+
+        app_data_dir = app.get_app_data_root('owncloud', config.cron_user())
+        if not isdir(join(app_data_dir, 'config')):
+            app.create_data_dir(app_data_dir, 'config', config.cron_user())
+
+        os.symlink(join(app_data_dir, 'config'), config.owncloud_config_link())
         app.create_data_dir(app_data_dir, 'data', 'owncloud')
 
         print("setup systemd")
@@ -50,9 +61,9 @@ class OwncloudInstaller:
 
         occ('app:enable user_ldap')
 
-        #https://doc.owncloud.org/server/8.0/admin_manual/configuration_server/occ_command.html
-        #This is a holdover from the early days, when there was no option to create additional configurations.
-        #The second, and all subsequent, configurations that you create are automatically assigned IDs:
+        # https://doc.owncloud.org/server/8.0/admin_manual/configuration_server/occ_command.html
+        # This is a holdover from the early days, when there was no option to create additional configurations.
+        # The second, and all subsequent, configurations that you create are automatically assigned IDs:
         occ('ldap:create-empty-config')
         occ('ldap:create-empty-config')
 
@@ -105,3 +116,6 @@ class OwncloudInstaller:
 
         if os.path.isdir(config.install_path()):
             shutil.rmtree(config.install_path())
+
+def fix_locale_gen(lang, locale_gen='/etc/locale.gen'):
+    massedit.edit_files([locale_gen], ["re.sub('# {0}', '{0}', line)".format(lang)], dry_run=False)
