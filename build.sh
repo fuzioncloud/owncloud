@@ -50,7 +50,7 @@ PYTHON_ZIP=python.tar.gz
 3rdparty python ${PYTHON_ZIP}
 
 if [ ! -f 3rdparty/${OWNCLOUD_ZIP} ]; then
-    wget -O 3rdparty/${OWNCLOUD_ZIP} https://download.owncloud.org/community/${NAME}-${OWNCLOUD_VERSION}.tar.bz2
+    wget -O 3rdparty/${OWNCLOUD_ZIP} https://download.owncloud.org/community/${NAME}-${OWNCLOUD_VERSION}.tar.bz2 --progress dot:giga
 else
   echo "skipping owncloud build"
 fi
