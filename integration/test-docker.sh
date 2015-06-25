@@ -23,5 +23,4 @@ PYTHON_BIN=${PYTHON_DIR}/bin/python
 PYTHON_ENV="export PYTHONPATH=/test/src;"
 SSH="sshpass -p syncloud ssh -o StrictHostKeyChecking=no root@localhost -p 2222"
 ${SSH} "$TC $PYTHON_ENV /test/integration/unit-test.sh"
-${SSH} "/opt/app/sam/bin/sam --debug install /test/owncloud-${5}-${6}.tar.gz"
-${SSH} "$TC $PYTHON_ENV ${PYTHON_DIR}/bin/py.test -s /test/integration/verify.py --email=$1 --password=$2 --domain=$3 --release=$4"
+${SSH} "$TC $PYTHON_ENV ${PYTHON_DIR}/bin/py.test -s /test/integration/verify.py --email=$1 --password=$2 --domain=$3 --release=$4 --app-version=$5 --arch=$6"
