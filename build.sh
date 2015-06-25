@@ -42,12 +42,10 @@ OWNCLOUD_ZIP=owncloud.tar.bz2
 PHP_ZIP=php.tar.gz
 NGINX_ZIP=nginx.tar.gz
 POSTGRESQL_ZIP=postgresql.tar.gz
-PYTHON_ZIP=python.tar.gz
 
 3rdparty php ${PHP_ZIP}
 3rdparty nginx ${NGINX_ZIP}
 3rdparty postgresql ${POSTGRESQL_ZIP}
-3rdparty python ${PYTHON_ZIP}
 
 if [ ! -f 3rdparty/${OWNCLOUD_ZIP} ]; then
     wget -O 3rdparty/${OWNCLOUD_ZIP} https://download.owncloud.org/community/${NAME}-${OWNCLOUD_VERSION}.tar.bz2 --progress dot:giga
@@ -55,27 +53,11 @@ else
   echo "skipping owncloud build"
 fi
 
-rm -f src/version
-echo ${VERSION} >> src/version
-cd src
-python setup.py sdist
-cd ..
-
 rm -rf build
 mkdir -p build/${NAME}
 cd build/${NAME}
 
 echo "packaging"
-
-tar -xzf ${DIR}/3rdparty/${PYTHON_ZIP}
-PYTHON_PATH='python/bin'
-
-wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py
-${PYTHON_PATH}/python get-pip.py
-rm get-pip.py
-
-${PYTHON_PATH}/pip install wheel
-${PYTHON_PATH}/pip install ${DIR}/src/dist/syncloud-owncloud-${VERSION}.tar.gz
 
 tar -xjf ${DIR}/3rdparty/${OWNCLOUD_ZIP}
 tar -xzf ${DIR}/3rdparty/${PHP_ZIP}
@@ -84,6 +66,7 @@ tar -xzf ${DIR}/3rdparty/${POSTGRESQL_ZIP}
 
 cp -r ${DIR}/bin .
 cp -r ${DIR}/config .
+cp -r ${DIR}/src .
 
 mv owncloud/config owncloud/config.orig
 

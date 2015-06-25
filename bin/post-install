@@ -1,3 +1,7 @@
-sys.path.append('/opt/app/owncloud/python/lib/python2.7/site-packages')
+from os.path import dirname, join, abspath
+import sys
+dir = home_path = abspath(join(dirname(__file__), '..'))
+sys.path.insert(1, join(home_path, 'src'))
+
 from owncloud.installer import OwncloudInstaller
 OwncloudInstaller().install()

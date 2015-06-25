@@ -1,2 +1,0 @@
-#!/bin/bash
-owncloud-ctl reconfigure
