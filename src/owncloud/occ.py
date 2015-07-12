@@ -1,7 +1,7 @@
 from subprocess import check_output
-from owncloud.config import Config
-from syncloud.app import logger
+from syncloud_app import logger
 
+from owncloud.config import Config
 
 def occ(args):
     log = logger.get_logger('owncloud.occ')

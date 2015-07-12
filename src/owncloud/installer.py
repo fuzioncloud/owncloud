@@ -1,19 +1,21 @@
-import os
-import shutil
-from subprocess import check_output
-import uuid
-from syncloud.app import logger
-from syncloud.systemd.systemctl import remove_service, add_service
-from syncloud.tools import app
-from syncloud.tools.nginx import Nginx
+from os import environ, symlink
 from os.path import isdir, join
+import shutil
+import uuid
 import massedit
 import pwd
+from subprocess import check_output
+
+from syncloud_app import logger
+from syncloud_platform.systemd.systemctl import remove_service, add_service
+from syncloud_platform.tools import app
+from syncloud_platform.tools.nginx import Nginx
+
 from owncloud import postgres
 from owncloud.config import Config
 from owncloud.cron import OwncloudCron
 from owncloud.occ import occ
-from owncloud.setup import Setup
+from owncloud.webface import Setup
 
 SYSTEMD_NGINX_NAME = 'owncloud-nginx'
 SYSTEMD_PHP_FPM_NAME = 'owncloud-php-fpm'
@@ -29,8 +31,8 @@ class OwncloudInstaller:
 
         config = Config()
 
-        if 'LANG' in os.environ:
-            lang = os.environ['LANG']
+        if 'LANG' in environ:
+            lang = environ['LANG']
             if lang not in check_output(['locale', '-a']):
                 print("generating locale: {0}".format(lang))
                 fix_locale_gen(lang)
@@ -46,7 +48,7 @@ class OwncloudInstaller:
         if not isdir(join(app_data_dir, 'config')):
             app.create_data_dir(app_data_dir, 'config', config.cron_user())
 
-        os.symlink(join(app_data_dir, 'config'), config.owncloud_config_link())
+        symlink(join(app_data_dir, 'config'), config.owncloud_config_link())
         app.create_data_dir(app_data_dir, 'data', 'owncloud')
 
         print("setup systemd")
@@ -114,7 +116,7 @@ class OwncloudInstaller:
 
         cron.remove()
 
-        if os.path.isdir(config.install_path()):
+        if isdir(config.install_path()):
             shutil.rmtree(config.install_path())
 
 def fix_locale_gen(lang, locale_gen='/etc/locale.gen'):

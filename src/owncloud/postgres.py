@@ -1,5 +1,6 @@
-from syncloud.app import logger
+from syncloud_app import logger
 from subprocess import check_output
+
 from owncloud.config import Config
 
 USER = "owncloud"

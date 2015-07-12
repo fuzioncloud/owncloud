@@ -5,7 +5,7 @@ from os.path import dirname, join, abspath
 import requests
 import time
 from subprocess import check_output
-from syncloud.app import logger
+from syncloud_app import logger
 
 DIR = dirname(__file__)
 APP_DIR = abspath(join(DIR, '..'))

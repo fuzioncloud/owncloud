@@ -1,7 +1,7 @@
 import requests
 import re
 from bs4 import BeautifulSoup
-from syncloud.app import logger
+from syncloud_app import logger
 from owncloud.config import Config
 
 
