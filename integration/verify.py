@@ -13,6 +13,7 @@ APP_DIR = abspath(join(DIR, '..'))
 device_user = 'user'
 device_password = 'password'
 
+
 def test_activate_device(auth):
     email, password, domain, release, version, arch = auth
     response = requests.post('http://localhost:81/server/rest/activate',
@@ -22,17 +23,22 @@ def test_activate_device(auth):
                                    'release': release})
     assert response.status_code == 200
 
+
 def test_owncloud_install(auth):
     email, password, domain, release, version, arch = auth
     logger.init(logging.DEBUG, True)
     log = logger.get_logger('test_owncloud_install')
-    log.info(check_output('/opt/app/sam/bin/sam --debug install /test/owncloud-{0}-{1}.tar.gz'.format(version, arch), shell=True))
+    ssh = 'sshpass -p syncloud ssh -o StrictHostKeyChecking=no -p 2222 root@localhost'
+    log.info(check_output('{0} /opt/app/sam/bin/sam --debug install /owncloud-{1}-{2}.tar.gz'.format(ssh, version, arch),
+                          shell=True))
     time.sleep(3)
+
 
 def test_visible_through_platform():
     session = requests.session()
     response = session.get('http://localhost/owncloud/', allow_redirects=False)
     assert response.status_code == 200
+
 
 def test_login():
     session = requests.session()
