@@ -1,5 +1,5 @@
 from os.path import dirname, join, abspath
 import sys
-sys.path.insert(1, abspath(join(dirname(__file__), '..', 'src')))
+sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
 from owncloud.installer import OwncloudInstaller
 OwncloudInstaller().remove()

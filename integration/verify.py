@@ -4,7 +4,7 @@ from os.path import dirname, join, abspath
 import time
 from subprocess import check_output
 
-sys.path.insert(1, abspath(join(dirname(__file__), '..', 'src')))
+sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
 from bs4 import BeautifulSoup
 import requests
 from syncloud_app import logger
