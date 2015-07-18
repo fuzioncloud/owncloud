@@ -1,10 +1,12 @@
-from bs4 import BeautifulSoup
+import sys
 import logging
 from os.path import dirname, join, abspath
-
-import requests
 import time
 from subprocess import check_output
+
+sys.path.insert(1, abspath(join(dirname(__file__), '..', 'src')))
+from bs4 import BeautifulSoup
+import requests
 from syncloud_app import logger
 
 DIR = dirname(__file__)

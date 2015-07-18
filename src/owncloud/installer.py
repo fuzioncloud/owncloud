@@ -119,5 +119,6 @@ class OwncloudInstaller:
         if isdir(config.install_path()):
             shutil.rmtree(config.install_path())
 
+
 def fix_locale_gen(lang, locale_gen='/etc/locale.gen'):
     massedit.edit_files([locale_gen], ["re.sub('# {0}', '{0}', line)".format(lang)], dry_run=False)
