@@ -1,5 +1,4 @@
 import sys
-import logging
 from os.path import dirname, join, abspath
 import time
 from subprocess import check_output
@@ -7,7 +6,6 @@ from subprocess import check_output
 sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
 from bs4 import BeautifulSoup
 import requests
-from syncloud_app import logger
 
 DIR = dirname(__file__)
 APP_DIR = abspath(join(DIR, '..'))
@@ -28,11 +26,9 @@ def test_activate_device(auth):
 
 def test_owncloud_install(auth):
     email, password, domain, release, version, arch = auth
-    logger.init(logging.DEBUG, True)
-    log = logger.get_logger('test_owncloud_install')
     ssh = 'sshpass -p syncloud ssh -o StrictHostKeyChecking=no -p 2222 root@localhost'
-    log.info(check_output('{0} /opt/app/sam/bin/sam --debug install /owncloud-{1}-{2}.tar.gz'.format(ssh, version, arch),
-                          shell=True))
+    print(check_output('{0} /opt/app/sam/bin/sam --debug install /owncloud-{1}-{2}.tar.gz'.format(ssh, version, arch),
+                       shell=True))
     time.sleep(3)
 
 
