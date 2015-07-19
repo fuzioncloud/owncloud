@@ -22,6 +22,8 @@ service docker start
 
 function cleanup {
 
+    mount | grep rootfs | awk '{print "umounting "$1; system("umount "$3)}'
+
     echo "cleaning old rootfs"
     rm -rf /tmp/rootfs
 
