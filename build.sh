@@ -1,6 +1,7 @@
 #!/bin/bash
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd ${DIR}
 
 export TMPDIR=/tmp
 export TMP=/tmp
@@ -18,12 +19,6 @@ if [ ! -z "$2" ]; then
     VERSION=$2
 fi
 
-
-APP_DATA_ROOT=/opt/data/${NAME}
-USER=owncloud
-
-cd ${DIR}
-
 function 3rdparty {
   APP_ID=$1
   APP_FILE=$2
@@ -37,6 +32,12 @@ function 3rdparty {
     echo "skipping ${APP_ID}"
   fi
 }
+
+pip install --upgrade coin
+
+./coin_lib.sh
+
+cp -r ${DIR}/src lib/syncloud-owncloud-${VERSION}
 
 OWNCLOUD_ZIP=owncloud.tar.bz2
 PHP_ZIP=php.tar.gz
@@ -66,7 +67,7 @@ tar -xzf ${DIR}/3rdparty/${POSTGRESQL_ZIP}
 
 cp -r ${DIR}/bin .
 cp -r ${DIR}/config .
-cp -r ${DIR}/src .
+cp -r ${DIR}/lib .
 
 mv owncloud/config owncloud/config.orig
 
