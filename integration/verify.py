@@ -1,14 +1,16 @@
 import sys
-from os.path import dirname, join, abspath
+from os import listdir
+from os.path import dirname, join, abspath, isdir
 import time
 from subprocess import check_output
 
-sys.path.append(abspath(join(dirname(__file__), '..', 'src')))
-from bs4 import BeautifulSoup
-import requests
+app_path = join(dirname(__file__), '..')
+sys.path.append(join(app_path, 'src'))
 
-DIR = dirname(__file__)
-APP_DIR = abspath(join(DIR, '..'))
+lib_path = join(app_path, 'lib')
+libs = [join(lib_path, item) for item in listdir(lib_path) if isdir(join(lib_path, item))]
+map(sys.path.append, libs)
+
 
 device_user = 'user'
 device_password = 'password'
