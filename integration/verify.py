@@ -28,25 +28,19 @@ def test_activate_device(auth):
     assert response.status_code == 200
 
 
-def test_owncloud_install(auth):
-    email, password, domain, release, version, arch = auth
-    ssh = 'sshpass -p syncloud ssh -o StrictHostKeyChecking=no -p 2222 root@localhost'
-    print(check_output('{0} /opt/app/sam/bin/sam --debug install /owncloud-{1}-{2}.tar.gz'.format(ssh, version, arch),
-                       shell=True))
-    time.sleep(3)
+def test_install(auth):
+    __local_install(auth)
+
+session = requests.session()
 
 
 def test_visible_through_platform():
-    session = requests.session()
     response = session.get('http://localhost/owncloud/', allow_redirects=False)
     assert response.status_code == 200
 
 
 def test_login():
-    session = requests.session()
     response = session.get('http://localhost/owncloud/', allow_redirects=False)
-    assert response.status_code == 200
-
     soup = BeautifulSoup(response.text)
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
     response = session.post('http://localhost/owncloud/index.php',
@@ -55,3 +49,21 @@ def test_login():
     assert response.status_code == 302
 
     assert session.get('http://localhost/owncloud/core/img/filetypes/text.png').status_code == 200
+
+
+def test_remove():
+    session.post('http://localhost/server/rest/login', data={'name': device_user, 'password': device_password})
+    response = session.get('http://localhost/server/rest/remove?app_id=owncloud', allow_redirects=False)
+    assert response.status_code == 200
+
+
+def test_reinstall(auth):
+    __local_install(auth)
+
+
+def __local_install(auth):
+    email, password, domain, release, version, arch = auth
+    ssh = 'sshpass -p syncloud ssh -o StrictHostKeyChecking=no -p 2222 root@localhost'
+    print(check_output('{0} /opt/app/sam/bin/sam --debug install /owncloud-{1}-{2}.tar.gz'.format(ssh, version, arch),
+                       shell=True))
+    time.sleep(3)

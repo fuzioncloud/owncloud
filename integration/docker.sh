@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ROOTFS=/tmp/rootfs
+ROOTFS=/tmp/owncloud/rootfs
 APP_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
 cd ${APP_DIR}
 if [[ $EUID -ne 0 ]]; then
@@ -22,10 +22,10 @@ service docker start
 
 function cleanup {
 
-    mount | grep rootfs | awk '{print "umounting "$1; system("umount "$3)}'
+    mount | grep ${ROOTFS} | awk '{print "umounting "$1; system("umount "$3)}'
 
     echo "cleaning old rootfs"
-    rm -rf /tmp/rootfs
+    rm -rf ${ROOTFS}
 
     echo "docker images"
     docker images -q
@@ -42,7 +42,7 @@ cleanup
 
 echo "extracting rootfs"
 rm -rf ${ROOTFS}
-mkdir ${ROOTFS}
+mkdir -p ${ROOTFS}
 tar xzf ${APP_DIR}/3rdparty/rootfs-${ARCH}.tar.gz -C ${ROOTFS}
 sed -i 's/Port 22/Port 2222/g' ${ROOTFS}/etc/ssh/sshd_config
 

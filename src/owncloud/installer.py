@@ -1,5 +1,5 @@
 from os import environ, symlink
-from os.path import isdir, join
+from os.path import isdir, join, isfile
 import shutil
 import uuid
 import massedit
@@ -53,53 +53,11 @@ class OwncloudInstaller:
 
         print("setup systemd")
         add_service(config.install_path(), SYSTEMD_POSTGRESQL)
-
-        postgres.execute("ALTER USER owncloud WITH PASSWORD 'owncloud';", database="postgres")
-
         add_service(config.install_path(), SYSTEMD_PHP_FPM_NAME)
         add_service(config.install_path(), SYSTEMD_NGINX_NAME)
 
-        Setup().finish(INSTALL_USER, unicode(uuid.uuid4().hex))
-
-        occ('app:enable user_ldap')
-
-        # https://doc.owncloud.org/server/8.0/admin_manual/configuration_server/occ_command.html
-        # This is a holdover from the early days, when there was no option to create additional configurations.
-        # The second, and all subsequent, configurations that you create are automatically assigned IDs:
-        occ('ldap:create-empty-config')
-        occ('ldap:create-empty-config')
-
-        occ('ldap:set-config s01 ldapHost ldap://localhost')
-        occ('ldap:set-config s01 ldapPort 389')
-        occ('ldap:set-config s01 ldapAgentName dc=syncloud,dc=org')
-        occ('ldap:set-config s01 ldapBase dc=syncloud,dc=org')
-        occ('ldap:set-config s01 ldapAgentPassword syncloud')
-
-        occ('ldap:set-config s01 ldapLoginFilter "(&(|(objectclass=inetOrgPerson))(uid=%uid))"')
-
-        occ('ldap:set-config s01 ldapUserFilterObjectclass inetOrgPerson')
-        occ('ldap:set-config s01 ldapBaseUsers ou=users,dc=syncloud,dc=org')
-        occ('ldap:set-config s01 ldapUserDisplayName cn')
-        occ('ldap:set-config s01 ldapExpertUsernameAttr cn')
-
-        occ('ldap:set-config s01 ldapGroupFilterObjectclass posixGroup')
-        occ('ldap:set-config s01 ldapGroupDisplayName cn')
-        occ('ldap:set-config s01 ldapBaseGroups ou=groups,dc=syncloud,dc=org')
-        occ('ldap:set-config s01 ldapGroupFilter "(&(|(objectclass=posixGroup)))"')
-        occ('ldap:set-config s01 ldapGroupMemberAssocAttr memberUid')
-
-        occ('ldap:set-config s01 ldapTLS 0')
-        occ('ldap:set-config s01 turnOffCertCheck 1')
-        occ('ldap:set-config s01 ldapConfigurationActive 1')
-
-        cron_cmd = config.cron_cmd()
-        self.log.info("running: {0}".format(cron_cmd))
-        self.log.info(check_output(cron_cmd, shell=True))
-
-        postgres.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
-        postgres.execute("update oc_ldap_group_members set owncloudname = 'admin';")
-
-        occ('user:delete {0}'.format(INSTALL_USER))
+        if not self.installed():
+            self.initialize(config)
 
         Nginx().add_app('owncloud', config.port())
 
@@ -118,6 +76,60 @@ class OwncloudInstaller:
 
         if isdir(config.install_path()):
             shutil.rmtree(config.install_path())
+
+    def installed(self):
+        config = Config()
+        if not isfile(config.config_file()):
+            return False
+
+        return 'installed' in open(config.config_file()).read().strip()
+
+    def initialize(self, config):
+
+            print("initialization")
+            postgres.execute("ALTER USER owncloud WITH PASSWORD 'owncloud';", database="postgres")
+
+            Setup().finish(INSTALL_USER, unicode(uuid.uuid4().hex))
+
+            occ('app:enable user_ldap')
+
+            # https://doc.owncloud.org/server/8.0/admin_manual/configuration_server/occ_command.html
+            # This is a holdover from the early days, when there was no option to create additional configurations.
+            # The second, and all subsequent, configurations that you create are automatically assigned IDs:
+            occ('ldap:create-empty-config')
+            occ('ldap:create-empty-config')
+
+            occ('ldap:set-config s01 ldapHost ldap://localhost')
+            occ('ldap:set-config s01 ldapPort 389')
+            occ('ldap:set-config s01 ldapAgentName dc=syncloud,dc=org')
+            occ('ldap:set-config s01 ldapBase dc=syncloud,dc=org')
+            occ('ldap:set-config s01 ldapAgentPassword syncloud')
+
+            occ('ldap:set-config s01 ldapLoginFilter "(&(|(objectclass=inetOrgPerson))(uid=%uid))"')
+
+            occ('ldap:set-config s01 ldapUserFilterObjectclass inetOrgPerson')
+            occ('ldap:set-config s01 ldapBaseUsers ou=users,dc=syncloud,dc=org')
+            occ('ldap:set-config s01 ldapUserDisplayName cn')
+            occ('ldap:set-config s01 ldapExpertUsernameAttr cn')
+
+            occ('ldap:set-config s01 ldapGroupFilterObjectclass posixGroup')
+            occ('ldap:set-config s01 ldapGroupDisplayName cn')
+            occ('ldap:set-config s01 ldapBaseGroups ou=groups,dc=syncloud,dc=org')
+            occ('ldap:set-config s01 ldapGroupFilter "(&(|(objectclass=posixGroup)))"')
+            occ('ldap:set-config s01 ldapGroupMemberAssocAttr memberUid')
+
+            occ('ldap:set-config s01 ldapTLS 0')
+            occ('ldap:set-config s01 turnOffCertCheck 1')
+            occ('ldap:set-config s01 ldapConfigurationActive 1')
+
+            cron_cmd = config.cron_cmd()
+            self.log.info("running: {0}".format(cron_cmd))
+            self.log.info(check_output(cron_cmd, shell=True))
+
+            postgres.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
+            postgres.execute("update oc_ldap_group_members set owncloudname = 'admin';")
+
+            occ('user:delete {0}'.format(INSTALL_USER))
 
 
 def fix_locale_gen(lang, locale_gen='/etc/locale.gen'):
