@@ -9,7 +9,7 @@ sys.path.append(join(app_path, 'src'))
 
 lib_path = join(app_path, 'lib')
 libs = [abspath(join(lib_path, item)) for item in listdir(lib_path) if isdir(join(lib_path, item))]
-map(sys.path.append, libs)
+map(lambda x: sys.path.insert(0, x), libs)
 
 import requests
 from bs4 import BeautifulSoup
