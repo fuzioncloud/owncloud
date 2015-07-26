@@ -19,59 +19,28 @@ if [ ! -z "$2" ]; then
     VERSION=$2
 fi
 
-function 3rdparty {
-  APP_ID=$1
-  APP_FILE=$2
-  if [ ! -d ${DIR}/3rdparty ]; then
-    mkdir ${DIR}/3rdparty
-  fi
-  if [ ! -f ${DIR}/3rdparty/${APP_FILE} ]; then
-    wget http://build.syncloud.org:8111/guestAuth/repository/download/thirdparty_${APP_ID}_${ARCHITECTURE}/lastSuccessful/${APP_FILE} \
-    -O ${DIR}/3rdparty/${APP_FILE} --progress dot:giga
-  else
-    echo "skipping ${APP_ID}"
-  fi
-}
-
 pip install --upgrade coin
 
 ./coin_lib.sh
 
 cp -r ${DIR}/src lib/syncloud-owncloud-${VERSION}
 
-OWNCLOUD_ZIP=owncloud.tar.bz2
-PHP_ZIP=php.tar.gz
-NGINX_ZIP=nginx.tar.gz
-POSTGRESQL_ZIP=postgresql.tar.gz
-
-3rdparty php ${PHP_ZIP}
-3rdparty nginx ${NGINX_ZIP}
-3rdparty postgresql ${POSTGRESQL_ZIP}
-
-if [ ! -f 3rdparty/${OWNCLOUD_ZIP} ]; then
-    wget -O 3rdparty/${OWNCLOUD_ZIP} https://download.owncloud.org/community/${NAME}-${OWNCLOUD_VERSION}.tar.bz2 --progress dot:giga
-else
-  echo "skipping owncloud build"
-fi
-
 rm -rf build
-mkdir -p build/${NAME}
-cd build/${NAME}
+BUILD_DIR=${DIR}/build/${NAME}
+mkdir -p ${BUILD_DIR}
 
-echo "packaging"
+DOWNLOAD_URL=http://build.syncloud.org:8111/guestAuth/repository/download
 
-tar -xjf ${DIR}/3rdparty/${OWNCLOUD_ZIP}
-tar -xzf ${DIR}/3rdparty/${PHP_ZIP}
-tar -xzf ${DIR}/3rdparty/${NGINX_ZIP}
-tar -xzf ${DIR}/3rdparty/${POSTGRESQL_ZIP}
+coin --to ${BUILD_DIR} --cache_folder php_${ARCHITECTURE} raw ${DOWNLOAD_URL}/thirdparty_php_${ARCHITECTURE}/lastSuccessful/php.tar.gz
+coin --to ${BUILD_DIR} --cache_folder nginx_${ARCHITECTURE} raw ${DOWNLOAD_URL}/thirdparty_nginx_${ARCHITECTURE}/lastSuccessful/nginx.tar.gz
+coin --to ${BUILD_DIR} --cache_folder postgresql_${ARCHITECTURE} raw ${DOWNLOAD_URL}/thirdparty_postgresql_${ARCHITECTURE}/lastSuccessful/postgresql.tar.gz
+coin --to ${BUILD_DIR} raw https://download.owncloud.org/community/${NAME}-${OWNCLOUD_VERSION}.tar.bz2
 
-cp -r ${DIR}/bin .
-cp -r ${DIR}/config .
-cp -r ${DIR}/lib .
+cp -r bin ${BUILD_DIR}
+cp -r config ${BUILD_DIR}
+cp -r lib ${BUILD_DIR}
 
-mv owncloud/config owncloud/config.orig
-
-cd ../..
+mv ${BUILD_DIR}/owncloud/config ${BUILD_DIR}/owncloud/config.orig
 
 mkdir build/${NAME}/META
 echo ${NAME} >> build/${NAME}/META/app
