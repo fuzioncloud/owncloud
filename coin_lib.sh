@@ -7,6 +7,8 @@ if [ ! -d lib ]; then
   mkdir lib
 fi
 
+rm -rf lib/*
+
 cd lib
 
 coin py https://pypi.python.org/packages/2.7/b/beautifulsoup4/beautifulsoup4-4.4.0-py2-none-any.whl
