@@ -19,8 +19,6 @@ if [ ! -z "$2" ]; then
     VERSION=$2
 fi
 
-pip install --upgrade coin
-
 ./coin_lib.sh
 
 cp -r ${DIR}/src lib/syncloud-owncloud-${VERSION}
