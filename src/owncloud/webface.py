@@ -33,13 +33,12 @@ class Setup:
         if response.status_code != 200:
             raise Exception("unable to finish setup: {0}: {0}".format(response.status_code, response.text))
 
-        soup = BeautifulSoup(response.text)
+        soup = BeautifulSoup(response.text, "html.parser")
         errors = soup.find('fieldset', class_='warning')
         if errors:
             errors = re.sub('(\n|\t)', '', errors.text)
             errors = re.sub('( +)', ' ', errors)
             raise Exception(errors)
-
 
     def is_finished(self,):
 
@@ -51,7 +50,7 @@ class Setup:
                 raise Exception("ownCloud is not trusting you to access {}".format(self.index_url))
 
             if response.status_code != 200:
-                soup = BeautifulSoup(response.text)
+                soup = BeautifulSoup(response.text, "html.parser")
                 error = soup.find('li', class_='error')
                 self.log.error(error)
                 raise Exception("ownCloud is not available at {}".format(self.index_url))

@@ -16,10 +16,7 @@ SCP="sshpass -p syncloud scp -o StrictHostKeyChecking=no -P 2222"
 ${SCP} ${DIR}/../owncloud-${5}-${6}.tar.gz root@localhost:/
 
 pip2 install -U pytest
-pip2 install -r ../src/dev_requirements.txt
 
-#export PYTHONPATH=${DIR}/../src
 py.test -s verify.py --email=$1 --password=$2 --domain=$3 --release=$4 --app-version=$5 --arch=$6
 
-${SCP} root@localhost:/opt/app/platform/uwsgi/internal.log .
-${SCP} root@localhost:/opt/app/platform/uwsgi/public.log .
+${SCP} root@localhost:/opt/data/platform/log/\* .
