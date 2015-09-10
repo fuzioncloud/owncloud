@@ -61,7 +61,9 @@ class OwncloudInstaller:
 
         Nginx().add_app('owncloud', config.port())
 
-        OwncloudCron(config).create()
+        cron = OwncloudCron(config)
+        cron.remove()
+        cron.create()
 
     def remove(self):
 
