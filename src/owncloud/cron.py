@@ -17,5 +17,5 @@ class OwncloudCron():
     def create(self):
         print("create crontab task")
         ci_job = self.cron.new(command=self.config.cron_cmd())
-        ci_job.setall('*/1 * * * *')
+        ci_job.setall('*/15 * * * *')
         self.cron.write()
