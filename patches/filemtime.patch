@@ -1,0 +1,11 @@
+--- lib/private/files/storage/local.php	2015-08-08 01:55:36.000000000 +0100
++++ lib/private/files/storage/local.php.fix	2015-09-11 23:04:04.050571325 +0100
+@@ -163,7 +163,7 @@
+ 
+ 		public function filemtime($path) {
+ 			clearstatcache($this->getSourcePath($path));
+-			return filemtime($this->getSourcePath($path));
++                        return exec ('stat -c %Y '. escapeshellarg ($this->getSourcePath($path)));
+ 		}
+ 
+ 		public function touch($path, $mtime = null) {

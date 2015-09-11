@@ -7,7 +7,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=owncloud
-OWNCLOUD_VERSION=8.0.3
+OWNCLOUD_VERSION=8.1.1
 
 ARCH=$(dpkg-architecture -qDEB_HOST_GNU_CPU)
 if [ ! -z "$1" ]; then
@@ -44,5 +44,9 @@ mkdir build/${NAME}/META
 echo ${NAME} >> build/${NAME}/META/app
 echo ${VERSION} >> build/${NAME}/META/version
 
+echo "patching"
+cd ${BUILD_DIR}/owncloud
+patch -p0 < ${DIR}/patches/filemtime.patch
+
 echo "zipping"
-tar cpzf ${NAME}-${VERSION}-${ARCH}.tar.gz -C build/ ${NAME}
+tar cpzf ${DIR}/${NAME}-${VERSION}-${ARCH}.tar.gz -C ${DIR}/build/ ${NAME}
