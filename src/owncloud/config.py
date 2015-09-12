@@ -31,6 +31,9 @@ class Config:
     def install_path(self):
         return self.parser.get('owncloud', 'install_path')
 
+    def original_config_dir(self):
+        return self.parser.get('owncloud', 'original_config_dir')
+
     def cron_user(self):
         return self.parser.get('owncloud', 'cron_user')
 
