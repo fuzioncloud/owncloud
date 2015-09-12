@@ -68,7 +68,7 @@ class OwncloudInstaller:
 
         ca_bundle_file = 'ca-bundle.crt'
         from_ca_bundle_certificate = '{0}/{1}'.format(config.original_config_dir(), ca_bundle_file)
-        to_ca_bundle_certificate = '{0}/{1}'.format(config.config_path(), ca_bundle_file)
+        to_ca_bundle_certificate = '{0}/{1}'.format(config.config_path, ca_bundle_file)
         if isfile(to_ca_bundle_certificate):
             os.remove(to_ca_bundle_certificate)
         shutil.copyfile(from_ca_bundle_certificate, to_ca_bundle_certificate)
