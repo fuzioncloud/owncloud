@@ -143,4 +143,6 @@ class OwncloudInstaller:
 
 
 def fix_locale_gen(lang, locale_gen='/etc/locale.gen'):
-    massedit.edit_files([locale_gen], ["re.sub('# {0}', '{0}', line)".format(lang)], dry_run=False)
+    editor = massedit.MassEdit()
+    editor.append_code_expr("re.sub('# {0}', '{0}', line)".format(lang))
+    editor.edit_file(locale_gen)
