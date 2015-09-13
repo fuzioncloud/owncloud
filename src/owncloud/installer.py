@@ -73,6 +73,9 @@ class OwncloudInstaller:
             os.remove(to_ca_bundle_certificate)
         shutil.copyfile(from_ca_bundle_certificate, to_ca_bundle_certificate)
 
+        check_output('{0}/owncloud-config {1} {2}'.format(
+            config.bin_dir(), 'memcache.local', "'\OC\Memcache\APCu'"), shell=True).strip()
+
     def remove(self):
 
         config = Config()

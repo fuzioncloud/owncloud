@@ -4,6 +4,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
 if [ ! -z "$TEAMCITY_VERSION" ]; then
+  echo "running under TeamCity, cleaning coin cache"
   rm -rf /tmp/coin.cache
 fi
 
