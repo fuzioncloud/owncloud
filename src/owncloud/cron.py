@@ -1,7 +1,7 @@
 from crontab import CronTab
 
 
-class OwncloudCron():
+class OwncloudCron:
 
     def __init__(self, config):
         self.config = config

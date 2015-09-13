@@ -41,7 +41,7 @@ def test_visible_through_platform():
 
 def test_login():
     response = session.get('http://localhost/owncloud/', allow_redirects=False)
-    soup = BeautifulSoup(response.text)
+    soup = BeautifulSoup(response.text, "html.parser")
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
     response = session.post('http://localhost/owncloud/index.php',
                             data={'user': device_user, 'password': device_password, 'requesttoken': requesttoken},
