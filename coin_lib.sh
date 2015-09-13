@@ -3,6 +3,10 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
+if [ ! -z "${teamcity.version}" ]; then
+  rm -rf /tmp/coin.cache
+fi
+
 if [ ! -d lib ]; then
   mkdir lib
 fi
