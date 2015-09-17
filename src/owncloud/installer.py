@@ -137,7 +137,7 @@ class OwncloudInstaller:
 
             cron_cmd = config.cron_cmd()
             self.log.info("running: {0}".format(cron_cmd))
-            self.log.info(check_output(cron_cmd, shell=True))
+            self.log.info(check_output('sudo -H -u {0} {1}'.format(config.cron_user(), cron_cmd), shell=True))
 
             postgres.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
             postgres.execute("update oc_ldap_group_members set owncloudname = 'admin';")
