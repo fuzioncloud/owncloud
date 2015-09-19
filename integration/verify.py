@@ -46,7 +46,8 @@ def test_login():
     response = session.post('http://localhost/owncloud/index.php',
                             data={'user': device_user, 'password': device_password, 'requesttoken': requesttoken},
                             allow_redirects=False)
-    assert response.status_code == 302
+
+    assert response.status_code == 302, response.text
 
     assert session.get('http://localhost/owncloud/core/img/filetypes/text.png').status_code == 200
 
