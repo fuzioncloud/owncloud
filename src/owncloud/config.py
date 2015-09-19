@@ -46,6 +46,12 @@ class Config:
     def bin_dir(self):
         return self.parser.get('owncloud', 'bin_dir')
 
+    def log_dir(self):
+        return self.parser.get('owncloud', 'log_dir')
+
+    def log_file(self):
+        return self.parser.get('owncloud', 'log_file')
+
     def root_path(self):
         return self.parser.get('owncloud', 'root_path')
 

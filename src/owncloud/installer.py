@@ -16,6 +16,7 @@ from owncloud import postgres
 from owncloud.config import Config
 from owncloud.cron import OwncloudCron
 from owncloud.occ import occ
+from owncloud.occonfig import owncloud_config_set
 from owncloud.webface import Setup
 
 SYSTEMD_NGINX_NAME = 'owncloud-nginx'
@@ -68,13 +69,15 @@ class OwncloudInstaller:
 
         ca_bundle_file = 'ca-bundle.crt'
         from_ca_bundle_certificate = '{0}/{1}'.format(config.original_config_dir(), ca_bundle_file)
-        to_ca_bundle_certificate = '{0}/{1}'.format(config.config_path, ca_bundle_file)
+        to_ca_bundle_certificate = '{0}/{1}'.format(config.owncloud_config_link(), ca_bundle_file)
         if isfile(to_ca_bundle_certificate):
             os.remove(to_ca_bundle_certificate)
+        print('copying {0} to {1}'.format(from_ca_bundle_certificate, to_ca_bundle_certificate))
         shutil.copyfile(from_ca_bundle_certificate, to_ca_bundle_certificate)
 
-        check_output('{0}/owncloud-config {1} {2}'.format(
-            config.bin_dir(), 'memcache.local', "'\OC\Memcache\APCu'"), shell=True).strip()
+        owncloud_config_set('memcache.local', '\OC\Memcache\APCu')
+        owncloud_config_set('loglevel', '2')
+        owncloud_config_set('logfile', config.log_file())
 
     def remove(self):
 

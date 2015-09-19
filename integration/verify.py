@@ -50,6 +50,8 @@ def test_login():
 
     assert session.get('http://localhost/owncloud/core/img/filetypes/text.png').status_code == 200
 
+def test_admin():
+    assert session.get('http://localhost/owncloud/index.php/settings/admin').status_code == 200
 
 def test_remove():
     session.post('http://localhost/server/rest/login', data={'name': device_user, 'password': device_password})
