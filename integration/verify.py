@@ -36,7 +36,7 @@ session = requests.session()
 
 def test_visible_through_platform():
     response = session.get('http://localhost/owncloud/', allow_redirects=False)
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
 
 
 def test_login():
@@ -52,12 +52,13 @@ def test_login():
     assert session.get('http://localhost/owncloud/core/img/filetypes/text.png').status_code == 200
 
 def test_admin():
-    assert session.get('http://localhost/owncloud/index.php/settings/admin').status_code == 200
+    response = session.get('http://localhost/owncloud/index.php/settings/admin')
+    assert response.status_code == 200, response.text
 
 def test_remove():
     session.post('http://localhost/server/rest/login', data={'name': device_user, 'password': device_password})
     response = session.get('http://localhost/server/rest/remove?app_id=owncloud', allow_redirects=False)
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
 
 
 def test_reinstall(auth):
