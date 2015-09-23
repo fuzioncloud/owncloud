@@ -52,7 +52,7 @@ def test_login():
     assert session.get('http://localhost/owncloud/core/img/filetypes/text.png').status_code == 200
 
 def test_admin():
-    response = session.get('http://localhost/owncloud/index.php/settings/admin')
+    response = session.get('http://localhost/owncloud/index.php/settings/admin', allow_redirects=False)
     assert response.status_code == 200, response.text
 
 def test_remove():
