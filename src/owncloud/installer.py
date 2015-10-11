@@ -2,6 +2,7 @@ from os import environ, symlink
 import os
 from os.path import isdir, join, isfile
 import shutil
+from sys import path
 import uuid
 import massedit
 import pwd
@@ -11,6 +12,9 @@ from syncloud_app import logger
 from syncloud_platform.systemd.systemctl import remove_service, add_service
 from syncloud_platform.tools import app
 from syncloud_platform.tools.nginx import Nginx
+from syncloud_platform.config.config import PlatformConfig
+from syncloud_platform.tools.touch import touch
+from syncloud_platform.tools.hardware import Hardware
 
 from owncloud import postgres
 from owncloud.config import Config
@@ -78,6 +82,8 @@ class OwncloudInstaller:
         owncloud_config_set('memcache.local', '\OC\Memcache\APCu')
         owncloud_config_set('loglevel', '2')
         owncloud_config_set('logfile', config.log_file())
+
+        self.prepare_storage()
 
     def remove(self):
 
@@ -147,8 +153,13 @@ class OwncloudInstaller:
 
             occ('user:delete {0}'.format(INSTALL_USER))
 
+    def prepare_storage(self):
+        hardware = Hardware()
+        app_storage_dir = hardware.init_app_storage('owncloud', 'owncloud')
+        touch(join(app_storage_dir, '.ocdata'))
 
 def fix_locale_gen(lang, locale_gen='/etc/locale.gen'):
     editor = massedit.MassEdit()
     editor.append_code_expr("re.sub('# {0}', '{0}', line)".format(lang))
     editor.edit_file(locale_gen)
+
