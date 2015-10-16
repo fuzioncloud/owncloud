@@ -62,6 +62,8 @@ class OwncloudInstaller:
         add_service(config.install_path(), SYSTEMD_PHP_FPM_NAME)
         add_service(config.install_path(), SYSTEMD_NGINX_NAME)
 
+        self.prepare_storage()
+
         if not self.installed():
             self.initialize(config)
 
@@ -82,8 +84,6 @@ class OwncloudInstaller:
         owncloud_config_set('memcache.local', '\OC\Memcache\APCu')
         owncloud_config_set('loglevel', '2')
         owncloud_config_set('logfile', config.log_file())
-
-        self.prepare_storage()
 
     def remove(self):
 
