@@ -10,14 +10,16 @@ fi
 
 ARCH=$(dpkg-architecture -q DEB_HOST_GNU_CPU)
 
-if [ ! -f 3rdparty/rootfs-${ARCH}.tar.gz ]; then
+ROOTFS_FILE=3rdparty/rootfs-${ARCH}.tar.gz
+
+if [ ! -f ${ROOTFS_FILE} ]; then
   if [ ! -d 3rdparty ]; then
     mkdir 3rdparty
   fi
   wget http://build.syncloud.org:8111/guestAuth/repository/download/debian_rootfs_syncloud_${ARCH}/lastSuccessful/rootfs.tar.gz\
-  -O 3rdparty/rootfs-${ARCH}.tar.gz --progress dot:giga
+  -O ${ROOTFS_FILE} --progress dot:giga
 else
-  echo "skipping rootfs"
+  echo "skipping rootfs: ${ROOTFS_FILE}"
 fi
 
 apt-get install docker.io
@@ -46,7 +48,7 @@ cleanup
 echo "extracting rootfs"
 rm -rf ${ROOTFS}
 mkdir -p ${ROOTFS}
-tar xzf ${APP_DIR}/3rdparty/rootfs-${ARCH}.tar.gz -C ${ROOTFS}
+tar xzf ${APP_DIR}/${ROOTFS_FILE} -C ${ROOTFS}
 sed -i 's/Port 22/Port 2222/g' ${ROOTFS}/etc/ssh/sshd_config
 
 echo "importing rootfs"

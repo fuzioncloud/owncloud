@@ -2,10 +2,15 @@
 <?php
 require_once '/opt/app/owncloud/owncloud/lib/base.php';
 
-if ($argc > 1) {
-    echo("setting ".$argv[1]." = ".$argv[2]."\n");
-    \OC::$server->getConfig()->setSystemValue($argv[1], $argv[2]);
+if ($argc > 2) {
+    if ($argc == 3) {
+        $value = $argv[2];
+    } else {
+        $value = array_slice($argv, 2);
+    }
+    echo("setting ".$argv[1]." = ".print_r($value, true)."\n");
+    \OC::$server->getConfig()->setSystemValue($argv[1], $value);
 } else {
-    echo("usage: ".$argv[0]." key value\n");
+    echo("usage: ".$argv[0]." key value1 [value2] [value3] ...\n");
     exit(1);
 }

@@ -4,17 +4,15 @@ from os.path import isdir, join, isfile
 import shutil
 from sys import path
 import uuid
-import massedit
-import pwd
 from subprocess import check_output
 
 from syncloud_app import logger
 from syncloud_platform.systemd.systemctl import remove_service, add_service
 from syncloud_platform.tools import app
 from syncloud_platform.tools.nginx import Nginx
-from syncloud_platform.config.config import PlatformConfig
 from syncloud_platform.tools.touch import touch
-from syncloud_platform.tools.hardware import Hardware
+from syncloud_platform.api import storage, info
+from syncloud_platform.tools import chown, locale
 
 from owncloud import postgres
 from owncloud.config import Config
@@ -27,6 +25,7 @@ SYSTEMD_NGINX_NAME = 'owncloud-nginx'
 SYSTEMD_PHP_FPM_NAME = 'owncloud-php-fpm'
 SYSTEMD_POSTGRESQL = 'owncloud-postgresql'
 INSTALL_USER = 'installer'
+APP_NAME = 'owncloud'
 
 
 class OwncloudInstaller:
@@ -37,25 +36,17 @@ class OwncloudInstaller:
 
         config = Config()
 
-        if 'LANG' in environ:
-            lang = environ['LANG']
-            if lang not in check_output(['locale', '-a']):
-                print("generating locale: {0}".format(lang))
-                fix_locale_gen(lang)
-                check_output('locale-gen')
+        locale.fix_locale()
 
-        try:
-            pwd.getpwnam(config.cron_user())
-        except KeyError:
-            self.log.info(check_output('/usr/sbin/useradd -r -s /bin/false {0}'.format(config.cron_user()), shell=True))
-        self.log.info(check_output('chown -R {0}. {1}'.format(config.cron_user(), config.install_path()), shell=True))
+        chown.chown(APP_NAME, config.install_path())
 
-        app_data_dir = app.get_app_data_root('owncloud', config.cron_user())
+        app_data_dir = app.get_app_data_root(APP_NAME, config.cron_user())
+
         if not isdir(join(app_data_dir, 'config')):
             app.create_data_dir(app_data_dir, 'config', config.cron_user())
 
         symlink(join(app_data_dir, 'config'), config.owncloud_config_link())
-        app.create_data_dir(app_data_dir, 'data', 'owncloud')
+        app.create_data_dir(app_data_dir, 'data', APP_NAME)
 
         print("setup systemd")
         add_service(config.install_path(), SYSTEMD_POSTGRESQL)
@@ -67,28 +58,22 @@ class OwncloudInstaller:
         if not self.installed():
             self.initialize(config)
 
-        Nginx().add_app('owncloud', config.port())
+        Nginx().add_app(APP_NAME, config.port())
 
         cron = OwncloudCron(config)
         cron.remove()
         cron.create()
 
-        ca_bundle_file = 'ca-bundle.crt'
-        from_ca_bundle_certificate = '{0}/{1}'.format(config.original_config_dir(), ca_bundle_file)
-        to_ca_bundle_certificate = '{0}/{1}'.format(config.owncloud_config_link(), ca_bundle_file)
-        if isfile(to_ca_bundle_certificate):
-            os.remove(to_ca_bundle_certificate)
-        print('copying {0} to {1}'.format(from_ca_bundle_certificate, to_ca_bundle_certificate))
-        shutil.copyfile(from_ca_bundle_certificate, to_ca_bundle_certificate)
-
         owncloud_config_set('memcache.local', '\OC\Memcache\APCu')
         owncloud_config_set('loglevel', '2')
         owncloud_config_set('logfile', config.log_file())
 
+        self.update_domain()
+
     def remove(self):
 
         config = Config()
-        Nginx().remove_app('owncloud')
+        Nginx().remove_app(APP_NAME)
         cron = OwncloudCron(config)
         remove_service(SYSTEMD_NGINX_NAME)
         remove_service(SYSTEMD_PHP_FPM_NAME)
@@ -154,12 +139,11 @@ class OwncloudInstaller:
             occ('user:delete {0}'.format(INSTALL_USER))
 
     def prepare_storage(self):
-        hardware = Hardware()
-        app_storage_dir = hardware.init_app_storage('owncloud', 'owncloud')
+        app_storage_dir = storage.init(APP_NAME, APP_NAME)
         touch(join(app_storage_dir, '.ocdata'))
 
-def fix_locale_gen(lang, locale_gen='/etc/locale.gen'):
-    editor = massedit.MassEdit()
-    editor.append_code_expr("re.sub('# {0}', '{0}', line)".format(lang))
-    editor.edit_file(locale_gen)
-
+    def update_domain(self):
+        domain = info.domain()
+        local_ip = check_output(["hostname", "-I"]).split(" ")[0]
+        domains = ['localhost', local_ip ,domain]
+        owncloud_config_set('trusted_domains', " ".join(domains))
