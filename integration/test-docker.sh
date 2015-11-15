@@ -19,4 +19,5 @@ pip2 install -U pytest
 
 py.test -s verify.py --email=$1 --password=$2 --domain=$3 --release=$4 --app-version=$5 --arch=$6
 
-${SCP} root@localhost:/opt/data/platform/log/\* .
+mkdir -p log
+${SCP} root@localhost:/opt/data/platform/log/\* log/

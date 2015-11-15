@@ -46,7 +46,6 @@ class OwncloudInstaller:
             app.create_data_dir(app_data_dir, 'config', config.cron_user())
 
         symlink(join(app_data_dir, 'config'), config.owncloud_config_link())
-        app.create_data_dir(app_data_dir, 'data', APP_NAME)
 
         print("setup systemd")
         add_service(config.install_path(), SYSTEMD_POSTGRESQL)
@@ -67,6 +66,7 @@ class OwncloudInstaller:
         owncloud_config_set('memcache.local', '\OC\Memcache\APCu')
         owncloud_config_set('loglevel', '2')
         owncloud_config_set('logfile', config.log_file())
+        owncloud_config_set('datadirectory', config.data_dir())
 
         self.update_domain()
 

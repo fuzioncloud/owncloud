@@ -7,3 +7,6 @@ build
 *.tar.bz2
 rootfs
 install
+*.log
+*.iml
+log
