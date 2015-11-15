@@ -83,7 +83,7 @@ def test_disk(syncloud_session, owncloud_session):
     __create_test_dir(owncloud_session, 'test0')
     __check_test_dir(owncloud_session, 'test0')
 
-    device1 = loop_device_add('ntfs', 0)
+    device1 = loop_device_add('ntfs', 1)
     __activate_disk(syncloud_session, device1)
     __create_test_dir(owncloud_session, 'test1')
     __check_test_dir(owncloud_session, 'test1')
