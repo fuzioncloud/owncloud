@@ -141,7 +141,7 @@ class OwncloudInstaller:
     def prepare_storage(self):
         app_storage_dir = storage.init(APP_NAME, APP_NAME)
         touch(join(app_storage_dir, '.ocdata'))
-        check_output('chmod 770 {0}'.format(app_storage_dir))
+        check_output('chmod 770 {0}'.format(app_storage_dir), shell=True)
         
 
     def update_domain(self):
