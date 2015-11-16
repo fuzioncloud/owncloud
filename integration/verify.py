@@ -110,6 +110,10 @@ def __create_test_dir(owncloud_session, test_dir):
 
 
 def __check_test_dir(owncloud_session, test_dir):
+
+    response = requests.get('http://localhost/owncloud')
+    assert response.status_code == 200, BeautifulSoup(response.text, "html.parser").find('li', class_='error')
+
     owncloud_session, _ = owncloud_session
     response = owncloud_session.get('http://localhost/owncloud/index.php/apps/files/ajax/list.php?dir=/',
                                     allow_redirects=False)
