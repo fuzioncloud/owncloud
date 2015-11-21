@@ -10,3 +10,6 @@ install
 *.log
 *.iml
 log
+.cache
+lib
+src/version
