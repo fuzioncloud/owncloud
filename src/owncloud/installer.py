@@ -69,7 +69,7 @@ class OwncloudInstaller:
 
         self.update_domain()
 
-        chown.chown(APP_NAME, config.data_dir())
+        chown.chown(APP_NAME, config.app_data_dir())
 
         platform_app.register_app(APP_NAME, config.port())
 
