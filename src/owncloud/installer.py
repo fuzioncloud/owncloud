@@ -13,6 +13,7 @@ from syncloud_platform.tools.nginx import Nginx
 from syncloud_platform.tools.touch import touch
 from syncloud_platform.api import storage, info
 from syncloud_platform.tools import chown, locale
+from syncloud_platform.api import app as platform_app
 
 from owncloud import postgres
 from owncloud.config import Config
@@ -57,8 +58,6 @@ class OwncloudInstaller:
         if not self.installed():
             self.initialize(config)
 
-        Nginx().add_app(APP_NAME, config.port())
-
         cron = OwncloudCron(config)
         cron.remove()
         cron.create()
@@ -70,10 +69,14 @@ class OwncloudInstaller:
 
         self.update_domain()
 
+        chown.chown(APP_NAME, config.data_dir())
+
+        platform_app.register_app(APP_NAME, config.port())
+
     def remove(self):
 
         config = Config()
-        Nginx().remove_app(APP_NAME)
+        platform_app.unregister_app(APP_NAME)
         cron = OwncloudCron(config)
         remove_service(SYSTEMD_NGINX_NAME)
         remove_service(SYSTEMD_PHP_FPM_NAME)
