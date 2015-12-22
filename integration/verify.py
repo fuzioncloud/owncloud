@@ -47,7 +47,7 @@ def syncloud_session():
 def owncloud_session_domain(user_domain):
     session = requests.session()
     response = session.get('http://127.0.0.1', headers={"Host": user_domain}, allow_redirects=False)
-    print(response.text)
+    # print(response.text)
     soup = BeautifulSoup(response.text, "html.parser")
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
     response = session.post('http://127.0.0.1/index.php',
