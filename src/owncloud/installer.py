@@ -145,10 +145,9 @@ class OwncloudInstaller:
         app_storage_dir = storage.init(APP_NAME, APP_NAME)
         touch(join(app_storage_dir, '.ocdata'))
         check_output('chmod 770 {0}'.format(app_storage_dir), shell=True)
-        
 
     def update_domain(self):
-        domain = info.domain()
+        app_domain = '{0}.{1}'.format(APP_NAME, info.domain())
         local_ip = check_output(["hostname", "-I"]).split(" ")[0]
-        domains = ['localhost', local_ip ,domain]
+        domains = ['localhost', local_ip, app_domain]
         owncloud_config_set('trusted_domains', " ".join(domains))
