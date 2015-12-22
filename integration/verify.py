@@ -17,17 +17,23 @@ sys.path.append(join(app_path, 'src'))
 
 lib_path = join(app_path, 'lib')
 libs = [abspath(join(lib_path, item)) for item in listdir(lib_path) if isdir(join(lib_path, item))]
-map(lambda x: sys.path.insert(0, x), libs)
+map(lambda x: sys.path.append(x), libs)
 
 import requests
 from bs4 import BeautifulSoup
 
 SYNCLOUD_INFO = 'syncloud.info'
-APP_DOMAIN = 'owncloud.{0}'.format(SYNCLOUD_INFO)
 DEVICE_USER = 'user'
 DEVICE_PASSWORD = 'password'
+OWNCLOUD_URL = 'localhost:1082'
 DIR = dirname(__file__)
 LOG_DIR = join(DIR, 'log')
+
+
+@pytest.fixture(scope='module')
+def user_domain(auth):
+    email, password, domain, release, version, arch = auth
+    return 'owncloud.{0}.{1}'.format(domain, SYNCLOUD_INFO)
 
 
 @pytest.fixture(scope='function')
@@ -38,13 +44,14 @@ def syncloud_session():
 
 
 @pytest.fixture(scope='function')
-def owncloud_session():
+def owncloud_session_domain(user_domain):
     session = requests.session()
-    response = session.get('http://127.0.0.1/', headers={"Host": APP_DOMAIN}, allow_redirects=False)
+    response = session.get('http://127.0.0.1', headers={"Host": user_domain}, allow_redirects=False)
+    print(response.text)
     soup = BeautifulSoup(response.text, "html.parser")
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
     response = session.post('http://127.0.0.1/index.php',
-                            headers={"Host": APP_DOMAIN},
+                            headers={"Host": user_domain},
                             data={'user': DEVICE_USER, 'password': DEVICE_PASSWORD, 'requesttoken': requesttoken},
                             allow_redirects=False)
     assert response.status_code == 302, response.text
@@ -62,6 +69,12 @@ def test_activate_device(auth):
                                    'name': DEVICE_USER, 'password': DEVICE_PASSWORD,
                                    'api-url': 'http://api.syncloud.info:81', 'domain': SYNCLOUD_INFO,
                                    'release': release})
+    assert response.status_code == 200, response.text
+
+
+def test_enable_external_access(syncloud_session):
+    response = syncloud_session.get('http://localhost/server/rest/settings/external_access_enable?mode=http')
+    assert '"success": true' in response.text
     assert response.status_code == 200
 
 
@@ -69,42 +82,43 @@ def test_install(auth):
     __local_install(auth)
 
 
-def test_resource(owncloud_session):
-    session, _ = owncloud_session
-    assert session.get('http://127.0.0.1/core/img/filetypes/text.png', headers={"Host": APP_DOMAIN}).status_code == 200
-
-
-def test_visible_through_platform():
-    response = requests.get('http://127.0.0.1/', headers={"Host": APP_DOMAIN}, allow_redirects=False)
+def test_resource(owncloud_session_domain, user_domain):
+    session, _ = owncloud_session_domain
+    response = session.get('http://127.0.0.1/core/img/filetypes/text.png', headers={"Host": user_domain})
     assert response.status_code == 200, response.text
 
 
-def test_admin(owncloud_session):
-    session, _ = owncloud_session
-    response = session.get('http://127.0.0.1/index.php/settings/admin', headers={"Host": APP_DOMAIN}, allow_redirects=False)
+def test_visible_through_platform(auth, user_domain):
+    response = requests.get('http://127.0.0.1', headers={"Host": user_domain}, allow_redirects=False)
     assert response.status_code == 200, response.text
 
 
-def test_disk(syncloud_session, owncloud_session):
+def test_admin(owncloud_session_domain, user_domain):
+    session, _ = owncloud_session_domain
+    response = session.get('http://127.0.0.1/index.php/settings/admin', headers={"Host": user_domain}, allow_redirects=False)
+    assert response.status_code == 200, response.text
 
-    loop_device_cleanup(0)
-    loop_device_cleanup(1)
 
-    device0 = loop_device_add('ext4', 0)
+def test_disk(syncloud_session, owncloud_session_domain, user_domain):
+
+    loop_device_cleanup(0, DEVICE_PASSWORD)
+    loop_device_cleanup(1, DEVICE_PASSWORD)
+
+    device0 = loop_device_add('ext4', 0, DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device0)
-    __create_test_dir(owncloud_session, 'test0')
-    __check_test_dir(owncloud_session, 'test0')
+    __create_test_dir(owncloud_session_domain, 'test0', user_domain)
+    __check_test_dir(owncloud_session_domain, 'test0', user_domain)
 
-    device1 = loop_device_add('ntfs', 1)
+    device1 = loop_device_add('ntfs', 1, DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device1)
-    __create_test_dir(owncloud_session, 'test1')
-    __check_test_dir(owncloud_session, 'test1')
+    __create_test_dir(owncloud_session_domain, 'test1', user_domain)
+    __check_test_dir(owncloud_session_domain, 'test1', user_domain)
 
     __activate_disk(syncloud_session, device0)
-    __check_test_dir(owncloud_session, 'test0')
+    __check_test_dir(owncloud_session_domain, 'test0', user_domain)
 
-    loop_device_cleanup(0)
-    loop_device_cleanup(1)
+    loop_device_cleanup(0, DEVICE_PASSWORD)
+    loop_device_cleanup(1, DEVICE_PASSWORD)
 
 
 def __activate_disk(syncloud_session, loop_device):
@@ -113,23 +127,23 @@ def __activate_disk(syncloud_session, loop_device):
     assert response.status_code == 200, response.text
 
 
-def __create_test_dir(owncloud_session, test_dir):
+def __create_test_dir(owncloud_session, test_dir, user_domain):
     owncloud_session, requesttoken = owncloud_session
     response = owncloud_session.post('http://127.0.0.1/index.php/apps/files/ajax/newfolder.php',
-                                     headers={"Host": APP_DOMAIN},
+                                     headers={"Host": user_domain},
                                      data={'dir': '', 'foldername': test_dir, 'requesttoken': requesttoken},
                                      allow_redirects=False)
     assert response.status_code == 200, response.text
 
 
-def __check_test_dir(owncloud_session, test_dir):
+def __check_test_dir(owncloud_session, test_dir, user_domain):
 
-    response = requests.get('http://127.0.0.1', headers={"Host": APP_DOMAIN})
+    response = requests.get('http://127.0.0.1', headers={"Host": user_domain})
     assert response.status_code == 200, BeautifulSoup(response.text, "html.parser").find('li', class_='error')
 
     owncloud_session, _ = owncloud_session
     response = owncloud_session.get('http://127.0.0.1/index.php/apps/files/ajax/list.php?dir=/',
-                                    headers={"Host": APP_DOMAIN},
+                                    headers={"Host": user_domain},
                                     allow_redirects=False)
     info = json.loads(response.text)
     dirs = map(lambda v: v['name'], info['data']['files'])
