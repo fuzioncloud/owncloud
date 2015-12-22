@@ -11,13 +11,5 @@ fi
 ./docker.sh
 
 apt-get install sshpass
-SCP="sshpass -p syncloud scp -o StrictHostKeyChecking=no -P 2222"
-
-${SCP} ${DIR}/../owncloud-${5}-${6}.tar.gz root@localhost:/
-
 pip2 install -U pytest
-
-py.test -s verify.py --email=$1 --password=$2 --domain=$3 --release=$4 --app-version=$5 --arch=$6
-
-mkdir -p log
-${SCP} root@localhost:/opt/data/platform/log/\* log/
+py.test -x -s verify.py --email=$1 --password=$2 --domain=$3 --release=$4 --app-version=$5 --arch=$6

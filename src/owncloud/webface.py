@@ -9,7 +9,7 @@ class Setup:
     def __init__(self):
         self.log = logger.get_logger('owncloud.setup.finish')
         self.config = Config()
-        self.index_url = 'http://localhost:{}/owncloud/index.php'.format(self.config.port())
+        self.index_url = 'http://localhost:{}/index.php'.format(self.config.port())
 
     def finish(self, login, password):
 

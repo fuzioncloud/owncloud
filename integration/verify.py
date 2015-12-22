@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 from os import listdir
 from os.path import dirname, join, abspath, isdir
@@ -6,8 +7,10 @@ import time
 from subprocess import check_output
 
 import pytest
+import shutil
 
 from integration.util.loop import loop_device_add, loop_device_cleanup
+from integration.util.ssh import run_scp, ssh_command, SSH, run_ssh, set_docker_ssh_port
 
 app_path = join(dirname(__file__), '..')
 sys.path.append(join(app_path, 'src'))
@@ -19,36 +22,45 @@ map(lambda x: sys.path.insert(0, x), libs)
 import requests
 from bs4 import BeautifulSoup
 
-device_user = 'user'
-device_password = 'password'
+SYNCLOUD_INFO = 'syncloud.info'
+APP_DOMAIN = 'owncloud.{0}'.format(SYNCLOUD_INFO)
+DEVICE_USER = 'user'
+DEVICE_PASSWORD = 'password'
+DIR = dirname(__file__)
+LOG_DIR = join(DIR, 'log')
 
 
 @pytest.fixture(scope='function')
 def syncloud_session():
     session = requests.session()
-    session.post('http://localhost/server/rest/login', data={'name': device_user, 'password': device_password})
+    session.post('http://localhost/server/rest/login', data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD})
     return session
 
 
 @pytest.fixture(scope='function')
 def owncloud_session():
     session = requests.session()
-    response = session.get('http://localhost/owncloud/', allow_redirects=False)
+    response = session.get('http://127.0.0.1/', headers={"Host": APP_DOMAIN}, allow_redirects=False)
     soup = BeautifulSoup(response.text, "html.parser")
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
-    response = session.post('http://localhost/owncloud/index.php',
-                            data={'user': device_user, 'password': device_password, 'requesttoken': requesttoken},
+    response = session.post('http://127.0.0.1/index.php',
+                            headers={"Host": APP_DOMAIN},
+                            data={'user': DEVICE_USER, 'password': DEVICE_PASSWORD, 'requesttoken': requesttoken},
                             allow_redirects=False)
     assert response.status_code == 302, response.text
     return session, requesttoken
+
+
+def test_remove_logs():
+    shutil.rmtree(LOG_DIR, ignore_errors=True)
 
 
 def test_activate_device(auth):
     email, password, domain, release, version, arch = auth
     response = requests.post('http://localhost:81/server/rest/activate',
                              data={'redirect-email': email, 'redirect-password': password, 'redirect-domain': domain,
-                                   'name': device_user, 'password': device_password,
-                                   'api-url': 'http://api.syncloud.info:81', 'domain': 'syncloud.info',
+                                   'name': DEVICE_USER, 'password': DEVICE_PASSWORD,
+                                   'api-url': 'http://api.syncloud.info:81', 'domain': SYNCLOUD_INFO,
                                    'release': release})
     assert response.status_code == 200
 
@@ -59,17 +71,17 @@ def test_install(auth):
 
 def test_resource(owncloud_session):
     session, _ = owncloud_session
-    assert session.get('http://localhost/owncloud/core/img/filetypes/text.png').status_code == 200
+    assert session.get('http://127.0.0.1/core/img/filetypes/text.png', headers={"Host": APP_DOMAIN}).status_code == 200
 
 
 def test_visible_through_platform():
-    response = requests.get('http://localhost/owncloud/', allow_redirects=False)
+    response = requests.get('http://127.0.0.1/', headers={"Host": APP_DOMAIN}, allow_redirects=False)
     assert response.status_code == 200, response.text
 
 
 def test_admin(owncloud_session):
     session, _ = owncloud_session
-    response = session.get('http://localhost/owncloud/index.php/settings/admin', allow_redirects=False)
+    response = session.get('http://127.0.0.1/index.php/settings/admin', headers={"Host": APP_DOMAIN}, allow_redirects=False)
     assert response.status_code == 200, response.text
 
 
@@ -103,7 +115,8 @@ def __activate_disk(syncloud_session, loop_device):
 
 def __create_test_dir(owncloud_session, test_dir):
     owncloud_session, requesttoken = owncloud_session
-    response = owncloud_session.post('http://localhost/owncloud/index.php/apps/files/ajax/newfolder.php',
+    response = owncloud_session.post('http://127.0.0.1/index.php/apps/files/ajax/newfolder.php',
+                                     headers={"Host": APP_DOMAIN},
                                      data={'dir': '', 'foldername': test_dir, 'requesttoken': requesttoken},
                                      allow_redirects=False)
     assert response.status_code == 200, response.text
@@ -111,11 +124,12 @@ def __create_test_dir(owncloud_session, test_dir):
 
 def __check_test_dir(owncloud_session, test_dir):
 
-    response = requests.get('http://localhost/owncloud')
+    response = requests.get('http://127.0.0.1', headers={"Host": APP_DOMAIN})
     assert response.status_code == 200, BeautifulSoup(response.text, "html.parser").find('li', class_='error')
 
     owncloud_session, _ = owncloud_session
-    response = owncloud_session.get('http://localhost/owncloud/index.php/apps/files/ajax/list.php?dir=/',
+    response = owncloud_session.get('http://127.0.0.1/index.php/apps/files/ajax/list.php?dir=/',
+                                    headers={"Host": APP_DOMAIN},
                                     allow_redirects=False)
     info = json.loads(response.text)
     dirs = map(lambda v: v['name'], info['data']['files'])
@@ -131,9 +145,19 @@ def test_reinstall(auth):
     __local_install(auth)
 
 
+def test_copy_logs():
+    os.mkdir(LOG_DIR)
+    run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
+
+    print('-------------------------------------------------------')
+    print('syncloud docker image is running')
+    print('connect using: {0}'.format(ssh_command(DEVICE_PASSWORD, SSH)))
+    print('-------------------------------------------------------')
+
+
 def __local_install(auth):
     email, password, domain, release, version, arch = auth
-    ssh = 'sshpass -p syncloud ssh -o StrictHostKeyChecking=no -p 2222 root@localhost'
-    print(check_output('{0} /opt/app/sam/bin/sam --debug install /owncloud-{1}-{2}.tar.gz'.format(ssh, version, arch),
-                       shell=True))
+    run_scp('{0}/../owncloud-{1}-{2}.tar.gz root@localhost:/'.format(DIR, version, arch), password=DEVICE_PASSWORD)
+    run_ssh('/opt/app/sam/bin/sam --debug install /owncloud-{0}-{1}.tar.gz'.format(version, arch), password=DEVICE_PASSWORD)
+    set_docker_ssh_port(DEVICE_PASSWORD)
     time.sleep(3)
