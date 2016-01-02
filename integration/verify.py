@@ -73,7 +73,7 @@ def test_activate_device(auth):
 
 
 def test_enable_external_access(syncloud_session):
-    response = syncloud_session.get('http://localhost/server/rest/settings/external_access_enable?mode=http')
+    response = syncloud_session.get('http://localhost/server/rest/settings/set_protocol', params={'protocol': 'https'})
     assert '"success": true' in response.text
     assert response.status_code == 200
 
