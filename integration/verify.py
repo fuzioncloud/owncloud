@@ -25,6 +25,7 @@ from bs4 import BeautifulSoup
 SYNCLOUD_INFO = 'syncloud.info'
 DEVICE_USER = 'user'
 DEVICE_PASSWORD = 'password'
+DEFAULT_DEVICE_PASSWORD = 'syncloud'
 OWNCLOUD_URL = 'localhost:1082'
 DIR = dirname(__file__)
 LOG_DIR = join(DIR, 'log')
@@ -64,6 +65,10 @@ def test_remove_logs():
 
 def test_activate_device(auth):
     email, password, domain, release, version, arch = auth
+
+    run_ssh('/opt/app/sam/bin/sam update --release {0}'.format(release), password=DEFAULT_DEVICE_PASSWORD)
+    run_ssh('/opt/app/sam/bin/sam --debug upgrade platform', password=DEFAULT_DEVICE_PASSWORD)
+
     response = requests.post('http://localhost:81/server/rest/activate',
                              data={'redirect-email': email, 'redirect-password': password, 'redirect-domain': domain,
                                    'name': DEVICE_USER, 'password': DEVICE_PASSWORD,
