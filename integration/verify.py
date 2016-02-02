@@ -95,7 +95,7 @@ def test_resource(owncloud_session_domain, user_domain):
 
 def test_sync(owncloud_session_domain, user_domain):
     os.mkdir('sync.test')
-    print(check_output('dd if=/dev/zero of=sync.test/1meg count=1 bs=1M', shell=True))
+    print(check_output('dd if=/dev/zero of=sync.test/1meg count=1 bs=3000M', shell=True))
     print(check_output('owncloudcmd -u {0} -p {1} sync.test http://{2}'.format(DEVICE_USER, DEVICE_PASSWORD, user_domain), shell=True))
 
 def test_visible_through_platform(auth, user_domain):
