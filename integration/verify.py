@@ -93,6 +93,11 @@ def test_resource(owncloud_session_domain, user_domain):
     assert response.status_code == 200, response.text
 
 
+def test_sync(owncloud_session_domain, user_domain):
+    os.mkdir('sync.test')
+    print(check_output('dd if=/dev/zero of=sync.test/1meg count=1 bs=1m', shell=True))
+    check_output('owncloudcmd sync.test http://{0}'.format(user_domain))
+
 def test_visible_through_platform(auth, user_domain):
     response = requests.get('http://127.0.0.1', headers={"Host": user_domain}, allow_redirects=False)
     assert response.status_code == 200, response.text
