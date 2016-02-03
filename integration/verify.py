@@ -70,10 +70,8 @@ def test_activate_device(auth):
     run_ssh('/opt/app/sam/bin/sam --debug upgrade platform', password=DEFAULT_DEVICE_PASSWORD)
 
     response = requests.post('http://localhost:81/server/rest/activate',
-                             data={'redirect-email': email, 'redirect-password': password, 'redirect-domain': domain,
-                                   'name': DEVICE_USER, 'password': DEVICE_PASSWORD,
-                                   'api-url': 'http://api.{0}'.format(SYNCLOUD_INFO), 'domain': SYNCLOUD_INFO,
-                                   'release': release})
+                             data={'main_domain': SYNCLOUD_INFO, 'redirect_email': email, 'redirect_password': password,
+                                   'user_domain': domain, 'device_username': DEVICE_USER, 'device_password': DEVICE_PASSWORD})
     assert response.status_code == 200, response.text
 
 
