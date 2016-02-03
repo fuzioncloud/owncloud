@@ -114,7 +114,7 @@ def _test_sync(user_domain, megabites):
     print(check_output(sync_cmd, shell=True))
     assert os.path.isfile(sync_full_path_file)
     os.remove(sync_full_path_file)
-    run_ssh('rm /data/{0}/files/{1}'.format(DEVICE_USER, sync_file))
+    run_ssh('rm /data/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
 
 
 def test_visible_through_platform(auth, user_domain):
