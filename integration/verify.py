@@ -93,10 +93,29 @@ def test_resource(owncloud_session_domain, user_domain):
     assert response.status_code == 200, response.text
 
 
-def test_sync(owncloud_session_domain, user_domain):
-    os.mkdir('sync.test')
-    print(check_output('dd if=/dev/zero of=sync.test/1meg count=1 bs=3000M', shell=True))
-    print(check_output('owncloudcmd -u {0} -p {1} sync.test http://{2}'.format(DEVICE_USER, DEVICE_PASSWORD, user_domain), shell=True))
+def test_sync_small_file(user_domain):
+    _test_sync(user_domain, 1)
+
+
+def test_sync_large_file(user_domain):
+    _test_sync(user_domain, 3000)
+
+
+def _test_sync(user_domain, megabites):
+    sync_cmd = 'owncloudcmd -u {0} -p {1} sync.test http://{2}'.format(DEVICE_USER, DEVICE_PASSWORD, user_domain)
+    sync_dir = 'sync.test'
+    sync_file = 'test.file-{0}'.format(megabites)
+    os.mkdir(sync_dir)
+    sync_full_path_file = join(sync_dir, sync_file)
+    print(check_output('dd if=/dev/zero of={0} count={1} bs=1M'.format(sync_full_path_file, megabites), shell=True))
+    print(check_output(sync_cmd, shell=True))
+    shutil.rmtree(sync_dir)
+    os.mkdir(sync_dir)
+    print(check_output(sync_cmd, shell=True))
+    assert os.path.isfile(sync_full_path_file)
+    os.remove(sync_full_path_file)
+    run_ssh('rm /data/{0}/files/{1}'.format(DEVICE_USER, sync_file))
+
 
 def test_visible_through_platform(auth, user_domain):
     response = requests.get('http://127.0.0.1', headers={"Host": user_domain}, allow_redirects=False)
@@ -172,6 +191,7 @@ def test_reinstall(auth):
 def test_copy_logs():
     os.mkdir(LOG_DIR)
     run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
+    run_scp('root@localhost:/opt/data/owncloud/*.log {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
 
     print('-------------------------------------------------------')
     print('syncloud docker image is running')
