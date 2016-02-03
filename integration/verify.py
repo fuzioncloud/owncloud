@@ -115,6 +115,7 @@ def _test_sync(user_domain, megabites):
     assert os.path.isfile(sync_full_path_file)
     os.remove(sync_full_path_file)
     run_ssh('rm /data/owncloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
+    shutil.rmtree(sync_dir)
 
 
 def test_visible_through_platform(auth, user_domain):
