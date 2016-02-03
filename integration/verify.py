@@ -93,11 +93,15 @@ def test_resource(owncloud_session_domain, user_domain):
     assert response.status_code == 200, response.text
 
 
-def test_sync_small_file(user_domain):
+def test_sync_1m_file(user_domain):
     _test_sync(user_domain, 1)
 
 
-def test_sync_large_file(user_domain):
+def test_sync_300m_file(user_domain):
+    _test_sync(user_domain, 300)
+
+
+def test_sync_4g_file(user_domain):
     _test_sync(user_domain, 3000)
 
 
