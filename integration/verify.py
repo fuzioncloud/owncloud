@@ -26,9 +26,26 @@ SYNCLOUD_INFO = 'syncloud.info'
 DEVICE_USER = 'user'
 DEVICE_PASSWORD = 'password'
 DEFAULT_DEVICE_PASSWORD = 'syncloud'
+LOGS_SSH_PASSWORD = DEFAULT_DEVICE_PASSWORD
 OWNCLOUD_URL = 'localhost:1082'
 DIR = dirname(__file__)
 LOG_DIR = join(DIR, 'log')
+
+
+@pytest.fixture(scope="session")
+def module_setup(request):
+    request.addfinalizer(module_teardown)
+
+
+def module_teardown():
+    os.mkdir(LOG_DIR)
+    run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(LOG_DIR), password=LOGS_SSH_PASSWORD)
+    run_scp('root@localhost:/opt/data/owncloud/*.log {0}'.format(LOG_DIR), password=LOGS_SSH_PASSWORD)
+
+    print('-------------------------------------------------------')
+    print('syncloud docker image is running')
+    print('connect using: {0}'.format(ssh_command(DEVICE_PASSWORD, SSH)))
+    print('-------------------------------------------------------')
 
 
 @pytest.fixture(scope='module')
@@ -59,7 +76,7 @@ def owncloud_session_domain(user_domain):
     return session, requesttoken
 
 
-def test_remove_logs():
+def test_start(module_setup):
     shutil.rmtree(LOG_DIR, ignore_errors=True)
 
 
@@ -73,6 +90,8 @@ def test_activate_device(auth):
                              data={'main_domain': SYNCLOUD_INFO, 'redirect_email': email, 'redirect_password': password,
                                    'user_domain': domain, 'device_username': DEVICE_USER, 'device_password': DEVICE_PASSWORD})
     assert response.status_code == 200, response.text
+    global LOGS_SSH_PASSWORD
+    LOGS_SSH_PASSWORD = DEVICE_PASSWORD
 
 
 # def test_enable_external_access(syncloud_session):
@@ -99,7 +118,7 @@ def test_sync_300m_file(user_domain):
     _test_sync(user_domain, 300)
 
 
-def test_sync_4g_file(user_domain):
+def test_sync_3g_file(user_domain):
     _test_sync(user_domain, 3000)
 
 
@@ -189,17 +208,6 @@ def test_remove(syncloud_session):
 
 def test_reinstall(auth):
     __local_install(auth)
-
-
-def test_copy_logs():
-    os.mkdir(LOG_DIR)
-    run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
-    run_scp('root@localhost:/opt/data/owncloud/*.log {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
-
-    print('-------------------------------------------------------')
-    print('syncloud docker image is running')
-    print('connect using: {0}'.format(ssh_command(DEVICE_PASSWORD, SSH)))
-    print('-------------------------------------------------------')
 
 
 def __local_install(auth):
