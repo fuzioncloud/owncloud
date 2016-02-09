@@ -39,8 +39,12 @@ def module_setup(request):
 
 def module_teardown():
     os.mkdir(LOG_DIR)
-    run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(LOG_DIR), password=LOGS_SSH_PASSWORD)
-    run_scp('root@localhost:/opt/data/owncloud/*.log {0}'.format(LOG_DIR), password=LOGS_SSH_PASSWORD)
+    platform_log_dir = join(LOG_DIR, 'platform_log')
+    os.mkdir(platform_log_dir)
+    run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(platform_log_dir), password=LOGS_SSH_PASSWORD)
+    owncloud_log_dir = join(LOG_DIR, 'owncloud_log')
+    os.mkdir(owncloud_log_dir)
+    run_scp('root@localhost:/opt/data/owncloud/log/*.log {0}'.format(owncloud_log_dir), password=LOGS_SSH_PASSWORD)
 
     print('-------------------------------------------------------')
     print('syncloud docker image is running')
@@ -126,6 +130,7 @@ def _test_sync(user_domain, megabites):
     sync_cmd = 'owncloudcmd -u {0} -p {1} sync.test http://{2}'.format(DEVICE_USER, DEVICE_PASSWORD, user_domain)
     sync_dir = 'sync.test'
     sync_file = 'test.file-{0}'.format(megabites)
+    shutil.rmtree(sync_dir)
     os.mkdir(sync_dir)
     sync_full_path_file = join(sync_dir, sync_file)
     print(check_output('dd if=/dev/zero of={0} count={1} bs=1M'.format(sync_full_path_file, megabites), shell=True))
@@ -136,7 +141,6 @@ def _test_sync(user_domain, megabites):
     assert os.path.isfile(sync_full_path_file)
     os.remove(sync_full_path_file)
     run_ssh('rm /data/owncloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
-    shutil.rmtree(sync_dir)
 
 
 def test_visible_through_platform(auth, user_domain):

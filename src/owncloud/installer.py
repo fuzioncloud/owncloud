@@ -43,8 +43,8 @@ class OwncloudInstaller:
 
         app_data_dir = app.get_app_data_root(APP_NAME, config.cron_user())
 
-        if not isdir(join(app_data_dir, 'config')):
-            app.create_data_dir(app_data_dir, 'config', config.cron_user())
+        app.create_data_dir(app_data_dir, 'config', 'owncloud')
+        app.create_data_dir(app_data_dir, 'log', 'owncloud')
 
         symlink(join(app_data_dir, 'config'), config.owncloud_config_link())
 
