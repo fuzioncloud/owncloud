@@ -10,7 +10,6 @@ fi
 
 ./docker.sh
 
-apt-get update
 apt-get install -y sshpass owncloud-client-cmd
 pip2 install -U pytest
 py.test -x -s verify.py --email=$1 --password=$2 --domain=$3 --release=$4 --app-version=$5 --arch=$6
