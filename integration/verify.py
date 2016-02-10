@@ -172,8 +172,8 @@ def test_disk(syncloud_session, owncloud_session_domain, user_domain):
     __activate_disk(syncloud_session, device0)
     __check_test_dir(owncloud_session_domain, 'test0', user_domain)
 
-    loop_device_cleanup(0, DEVICE_PASSWORD)
-    loop_device_cleanup(1, DEVICE_PASSWORD)
+    #loop_device_cleanup(0, DEVICE_PASSWORD)
+    #loop_device_cleanup(1, DEVICE_PASSWORD)
 
 
 def __activate_disk(syncloud_session, loop_device):
