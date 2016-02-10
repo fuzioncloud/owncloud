@@ -145,6 +145,7 @@ class OwncloudInstaller:
         app_storage_dir = storage.init(APP_NAME, APP_NAME)
         touch(join(app_storage_dir, '.ocdata'))
         check_output('chmod 770 {0}'.format(app_storage_dir), shell=True)
+        app.create_data_dir(app_storage_dir, 'tmp', 'owncloud')
 
     def update_domain(self):
         app_domain = '{0}.{1}'.format(APP_NAME, info.domain())
