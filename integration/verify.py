@@ -27,7 +27,6 @@ DEVICE_USER = 'user'
 DEVICE_PASSWORD = 'password'
 DEFAULT_DEVICE_PASSWORD = 'syncloud'
 LOGS_SSH_PASSWORD = DEFAULT_DEVICE_PASSWORD
-OWNCLOUD_URL = 'localhost:1082'
 DIR = dirname(__file__)
 LOG_DIR = join(DIR, 'log')
 
@@ -69,7 +68,6 @@ def syncloud_session():
 def owncloud_session_domain(user_domain):
     session = requests.session()
     response = session.get('http://127.0.0.1', headers={"Host": user_domain}, allow_redirects=False)
-    # print(response.text)
     soup = BeautifulSoup(response.text, "html.parser")
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
     response = session.post('http://127.0.0.1/index.php',
@@ -126,21 +124,33 @@ def test_sync_3g_file(user_domain):
     _test_sync(user_domain, 3000)
 
 
+def sync_cmd(sync_dir, user_domain):
+    return 'owncloudcmd -u {0} -p {1} {2} http://{3}'.format(DEVICE_USER, DEVICE_PASSWORD, sync_dir, user_domain)
+
+
 def _test_sync(user_domain, megabites):
-    sync_cmd = 'owncloudcmd -u {0} -p {1} sync.test http://{2}'.format(DEVICE_USER, DEVICE_PASSWORD, user_domain)
-    sync_dir = 'sync.test'
+
+    sync_dir_upload = 'sync.test.upload'
     sync_file = 'test.file-{0}'.format(megabites)
-    shutil.rmtree(sync_dir, ignore_errors=True)
-    os.mkdir(sync_dir)
-    sync_full_path_file = join(sync_dir, sync_file)
+    shutil.rmtree(sync_dir_upload, ignore_errors=True)
+    os.mkdir(sync_dir_upload)
+    sync_full_path_file = join(sync_dir_upload, sync_file)
     print(check_output('dd if=/dev/zero of={0} count={1} bs=1M'.format(sync_full_path_file, megabites), shell=True))
-    print(check_output(sync_cmd, shell=True))
-    shutil.rmtree(sync_dir, ignore_errors=True)
-    os.mkdir(sync_dir)
-    print(check_output(sync_cmd, shell=True))
+    print(check_output(sync_cmd(sync_dir_upload, user_domain), shell=True))
+
+    sync_dir_download = 'sync.test.download'
+    shutil.rmtree(sync_dir_download, ignore_errors=True)
+    os.mkdir(sync_dir_download)
+    print(check_output(sync_cmd(sync_dir_download, user_domain), shell=True))
+    sync_full_path_file = join(sync_dir_download, sync_file)
+
     assert os.path.isfile(sync_full_path_file)
-    os.remove(sync_full_path_file)
     run_ssh('rm /data/owncloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
+    files_scan()
+
+
+def files_scan():
+    run_ssh('/opt/app/owncloud/bin/occ-runner files:scan --all', password=DEVICE_PASSWORD)
 
 
 def test_visible_through_platform(auth, user_domain):
@@ -154,23 +164,23 @@ def test_admin(owncloud_session_domain, user_domain):
     assert response.status_code == 200, response.text
 
 
-def test_disk(syncloud_session, owncloud_session_domain, user_domain):
+def test_disk(syncloud_session, user_domain):
 
     loop_device_cleanup(0, DEVICE_PASSWORD)
     loop_device_cleanup(1, DEVICE_PASSWORD)
 
     device0 = loop_device_add('ext4', 0, DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device0)
-    __create_test_dir(owncloud_session_domain, 'test0', user_domain)
-    __check_test_dir(owncloud_session_domain, 'test0', user_domain)
+    __create_test_dir(owncloud_session_domain(user_domain), 'test0', user_domain)
+    __check_test_dir(owncloud_session_domain(user_domain), 'test0', user_domain)
 
     device1 = loop_device_add('ntfs', 1, DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device1)
-    __create_test_dir(owncloud_session_domain, 'test1', user_domain)
-    __check_test_dir(owncloud_session_domain, 'test1', user_domain)
+    __create_test_dir(owncloud_session_domain(user_domain), 'test1', user_domain)
+    __check_test_dir(owncloud_session_domain(user_domain), 'test1', user_domain)
 
     __activate_disk(syncloud_session, device0)
-    __check_test_dir(owncloud_session_domain, 'test0', user_domain)
+    __check_test_dir(owncloud_session_domain(user_domain), 'test0', user_domain)
 
     #loop_device_cleanup(0, DEVICE_PASSWORD)
     #loop_device_cleanup(1, DEVICE_PASSWORD)
@@ -179,15 +189,17 @@ def test_disk(syncloud_session, owncloud_session_domain, user_domain):
 def __activate_disk(syncloud_session, loop_device):
     response = syncloud_session.get('http://localhost/server/rest/settings/disk_activate',
                                     params={'device': loop_device}, allow_redirects=False)
+    files_scan()
     assert response.status_code == 200, response.text
 
 
 def __create_test_dir(owncloud_session, test_dir, user_domain):
-    owncloud_session, requesttoken = owncloud_session
-    response = owncloud_session.post('http://127.0.0.1/index.php/apps/files/ajax/newfolder.php',
-                                     headers={"Host": user_domain},
-                                     data={'dir': '', 'foldername': test_dir, 'requesttoken': requesttoken},
-                                     allow_redirects=False)
+    owncloud, requesttoken = owncloud_session
+    response = owncloud.post('http://127.0.0.1/index.php/apps/files/ajax/newfolder.php',
+                             headers={"Host": user_domain},
+                             data={'dir': '', 'foldername': test_dir, 'requesttoken': requesttoken},
+                             allow_redirects=False)
+    print(response.text)
     assert response.status_code == 200, response.text
 
 
@@ -196,11 +208,12 @@ def __check_test_dir(owncloud_session, test_dir, user_domain):
     response = requests.get('http://127.0.0.1', headers={"Host": user_domain})
     assert response.status_code == 200, BeautifulSoup(response.text, "html.parser").find('li', class_='error')
 
-    owncloud_session, _ = owncloud_session
-    response = owncloud_session.get('http://127.0.0.1/index.php/apps/files/ajax/list.php?dir=/',
-                                    headers={"Host": user_domain},
-                                    allow_redirects=False)
+    owncloud, _ = owncloud_session
+    response = owncloud.get('http://127.0.0.1/index.php/apps/files/ajax/list.php?dir=/',
+                            headers={"Host": user_domain},
+                            allow_redirects=False)
     info = json.loads(response.text)
+    print(response.text)
     dirs = map(lambda v: v['name'], info['data']['files'])
     assert test_dir in dirs, response.text
 
