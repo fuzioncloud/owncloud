@@ -31,7 +31,7 @@ APP_NAME = 'owncloud'
 
 class OwncloudInstaller:
     def __init__(self):
-        self.log = logger.get_logger('owncloud.installer')
+        self.log = logger.get_logger('owncloud_installer')
 
     def install(self):
 
