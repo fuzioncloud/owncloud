@@ -38,7 +38,7 @@ cp -r bin ${BUILD_DIR}
 cp -r config ${BUILD_DIR}
 cp -r lib ${BUILD_DIR}
 
-mv ${BUILD_DIR}/owncloud/config ${BUILD_DIR}/owncloud/config.orig
+rm -rf ${BUILD_DIR}/owncloud/config
 
 mkdir build/${NAME}/META
 echo ${NAME} >> build/${NAME}/META/app
