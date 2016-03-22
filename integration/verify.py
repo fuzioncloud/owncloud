@@ -120,8 +120,8 @@ def test_sync_300m_file(user_domain):
     _test_sync(user_domain, 300)
 
 
-def test_sync_3g_file(user_domain):
-    _test_sync(user_domain, 3000)
+# def test_sync_3g_file(user_domain):
+#     _test_sync(user_domain, 3000)
 
 
 def sync_cmd(sync_dir, user_domain):
