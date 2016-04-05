@@ -120,8 +120,8 @@ def test_sync_300m_file(user_domain):
     _test_sync(user_domain, 300)
 
 
-def test_sync_3g_file(user_domain):
-    _test_sync(user_domain, 3000)
+# def test_sync_3g_file(user_domain):
+#     _test_sync(user_domain, 3000)
 
 
 def sync_cmd(sync_dir, user_domain):
@@ -171,12 +171,12 @@ def test_disk(syncloud_session, user_domain):
 
     device0 = loop_device_add('ext4', 0, DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device0)
-    __create_test_dir(owncloud_session_domain(user_domain), 'test0', user_domain)
+    __create_test_dir('test0', user_domain)
     __check_test_dir(owncloud_session_domain(user_domain), 'test0', user_domain)
 
     device1 = loop_device_add('ntfs', 1, DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device1)
-    __create_test_dir(owncloud_session_domain(user_domain), 'test1', user_domain)
+    __create_test_dir('test1', user_domain)
     __check_test_dir(owncloud_session_domain(user_domain), 'test1', user_domain)
 
     __activate_disk(syncloud_session, device0)
@@ -193,14 +193,12 @@ def __activate_disk(syncloud_session, loop_device):
     assert response.status_code == 200, response.text
 
 
-def __create_test_dir(owncloud_session, test_dir, user_domain):
-    owncloud, requesttoken = owncloud_session
-    response = owncloud.post('http://127.0.0.1/index.php/apps/files/ajax/newfolder.php',
-                             headers={"Host": user_domain},
-                             data={'dir': '', 'foldername': test_dir, 'requesttoken': requesttoken},
-                             allow_redirects=False)
+def __create_test_dir(test_dir, user_domain):
+    response = requests.request('MKCOL', 'http://{0}:{1}@127.0.0.1/remote.php/webdav/{2}'.format(
+        DEVICE_USER, DEVICE_PASSWORD, test_dir),
+                                headers={"Host": user_domain})
     print(response.text)
-    assert response.status_code == 200, response.text
+    assert response.status_code == 201, response.text
 
 
 def __check_test_dir(owncloud_session, test_dir, user_domain):

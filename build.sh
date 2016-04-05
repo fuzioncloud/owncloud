@@ -7,7 +7,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=owncloud
-OWNCLOUD_VERSION=8.2.2
+OWNCLOUD_VERSION=9.0.0
 
 ARCH=$(dpkg-architecture -qDEB_HOST_GNU_CPU)
 if [ ! -z "$1" ]; then
@@ -38,7 +38,7 @@ cp -r bin ${BUILD_DIR}
 cp -r config ${BUILD_DIR}
 cp -r lib ${BUILD_DIR}
 
-mv ${BUILD_DIR}/owncloud/config ${BUILD_DIR}/owncloud/config.orig
+rm -rf ${BUILD_DIR}/owncloud/config
 
 mkdir build/${NAME}/META
 echo ${NAME} >> build/${NAME}/META/app
