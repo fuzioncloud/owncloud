@@ -44,9 +44,16 @@ mkdir build/${NAME}/META
 echo ${NAME} >> build/${NAME}/META/app
 echo ${VERSION} >> build/${NAME}/META/version
 
-echo "patching"
+echo "patching filemtime fr huge file support on 32 bit php (with special compile flags)"
 cd ${BUILD_DIR}/owncloud
 patch -p0 < ${DIR}/patches/filemtime.patch
+
+LOCAL_PHP_SHA512 = $(sha512sum lib/private/files/storage/local.php | cut -d' ' -f1)
+echo "before sha512 fix"
+grep local.php core/signature.json
+sed -i 's#"lib\\/private\\/files\\/storage\\/local\.php\": \".*\"#\"lib\\/private\\/files\\/storage\\/local.php\": \"$LOCAL_PHP_SHA512\"#g' core/signature.json
+echo "after sha512 fix"
+grep local.php core/signature.json
 
 echo "zipping"
 tar cpzf ${DIR}/${NAME}-${VERSION}-${ARCH}.tar.gz -C ${DIR}/build/ ${NAME}
