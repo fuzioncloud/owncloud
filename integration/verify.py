@@ -60,7 +60,7 @@ def user_domain(auth):
 @pytest.fixture(scope='function')
 def syncloud_session():
     session = requests.session()
-    session.post('http://localhost/server/rest/login', data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD})
+    session.post('http://localhost/rest/login', data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD})
     return session
 
 
@@ -187,7 +187,7 @@ def test_disk(syncloud_session, user_domain):
 
 
 def __activate_disk(syncloud_session, loop_device):
-    response = syncloud_session.get('http://localhost/server/rest/settings/disk_activate',
+    response = syncloud_session.get('http://localhost/rest/settings/disk_activate',
                                     params={'device': loop_device}, allow_redirects=False)
     files_scan()
     assert response.status_code == 200, response.text
@@ -217,7 +217,7 @@ def __check_test_dir(owncloud_session, test_dir, user_domain):
 
 
 def test_remove(syncloud_session):
-    response = syncloud_session.get('http://localhost/server/rest/remove?app_id=owncloud', allow_redirects=False)
+    response = syncloud_session.get('http://localhost/rest/remove?app_id=owncloud', allow_redirects=False)
     assert response.status_code == 200, response.text
 
 
