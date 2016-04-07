@@ -164,6 +164,13 @@ def test_admin(owncloud_session_domain, user_domain):
     assert response.status_code == 200, response.text
 
 
+def test_hash_verification(owncloud_session_domain, user_domain):
+    session, _ = owncloud_session_domain
+    response = session.get('http://127.0.0.1/index.php/settings/integrity/failed', headers={"Host": user_domain}, allow_redirects=False)
+    assert response.status_code == 200, response.text
+    assert 'INVALID_HASH' not in response.text
+
+
 def test_disk(syncloud_session, user_domain):
 
     loop_device_cleanup(0, DEVICE_PASSWORD)
