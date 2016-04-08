@@ -66,6 +66,7 @@ class OwncloudInstaller:
         owncloud_config_set('loglevel', '2')
         owncloud_config_set('logfile', config.log_file())
         owncloud_config_set('datadirectory', config.data_dir())
+        owncloud_config_set('integrity.check.disabled', 'true')
 
         self.update_domain()
 
