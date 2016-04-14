@@ -29,10 +29,10 @@ mkdir -p ${BUILD_DIR}
 
 DOWNLOAD_URL=http://build.syncloud.org:8111/guestAuth/repository/download
 
-coin --cache_folder=${COIN_CACHE_DIR}/php --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_php_${ARCH}/lastSuccessful/php-${ARCH}.tar.gz
-coin --cache_folder=${COIN_CACHE_DIR}/nginx --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_nginx_${ARCH}/lastSuccessful/nginx-${ARCH}.tar.gz
-coin --cache_folder=${COIN_CACHE_DIR}/postgresql --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_postgresql_${ARCH}/lastSuccessful/postgresql-${ARCH}.tar.gz
-coin --cache_folder=${COIN_CACHE_DIR}/owncloud --to ${BUILD_DIR} raw https://download.owncloud.org/community/${NAME}-${OWNCLOUD_VERSION}.tar.bz2
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_php_${ARCH}/lastSuccessful/php-${ARCH}.tar.gz
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_nginx_${ARCH}/lastSuccessful/nginx-${ARCH}.tar.gz
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_postgresql_${ARCH}/lastSuccessful/postgresql-${ARCH}.tar.gz
+coin --to ${BUILD_DIR} raw https://download.owncloud.org/community/${NAME}-${OWNCLOUD_VERSION}.tar.bz2
 
 cp -r bin ${BUILD_DIR}
 cp -r config ${BUILD_DIR}
