@@ -9,7 +9,6 @@ from subprocess import check_output
 from syncloud_app import logger
 from syncloud_platform.systemd.systemctl import remove_service, add_service
 from syncloud_platform.tools import app
-from syncloud_platform.tools.nginx import Nginx
 from syncloud_platform.tools.touch import touch
 from syncloud_platform.api import storage, info
 from syncloud_platform.tools import chown, locale
@@ -27,7 +26,11 @@ SYSTEMD_PHP_FPM_NAME = 'owncloud-php-fpm'
 SYSTEMD_POSTGRESQL = 'owncloud-postgresql'
 INSTALL_USER = 'installer'
 APP_NAME = 'owncloud'
+USER_NAME = 'owncloud'
 
+def makepath(path):
+    if not isdir(path):
+        os.makedirs(path)
 
 class OwncloudInstaller:
     def __init__(self):
@@ -39,14 +42,19 @@ class OwncloudInstaller:
 
         locale.fix_locale()
 
-        chown.chown(APP_NAME, config.install_path())
+        chown.chown(USER_NAME, config.install_path())
 
-        app_data_dir = app.get_app_data_root(APP_NAME, config.cron_user())
+        app_data_dir = app.get_app_data_dir(APP_NAME)
 
-        app.create_data_dir(app_data_dir, 'config', 'owncloud')
-        app.create_data_dir(app_data_dir, 'log', 'owncloud')
+        config_dir = join(app_data_dir, 'config')
+        log_dir = join(app_data_dir, 'log')
 
-        symlink(join(app_data_dir, 'config'), config.owncloud_config_link())
+        makepath(config_dir)
+        makepath(log_dir)
+
+        chown.chown(USER_NAME, app_data_dir)
+
+        symlink(config_dir, config.owncloud_config_link())
 
         print("setup systemd")
         add_service(config.install_path(), SYSTEMD_POSTGRESQL)
@@ -70,7 +78,7 @@ class OwncloudInstaller:
 
         self.update_domain()
 
-        chown.chown(APP_NAME, config.app_data_dir())
+        chown.chown(USER_NAME, config.app_data_dir())
 
         platform_app.register_app(APP_NAME, config.port())
 
@@ -143,7 +151,7 @@ class OwncloudInstaller:
             occ('user:delete {0}'.format(INSTALL_USER))
 
     def prepare_storage(self):
-        app_storage_dir = storage.init(APP_NAME, APP_NAME)
+        app_storage_dir = storage.init(APP_NAME, USER_NAME)
         touch(join(app_storage_dir, '.ocdata'))
         check_output('chmod 770 {0}'.format(app_storage_dir), shell=True)
         app.create_data_dir(app_storage_dir, 'tmp', 'owncloud')
