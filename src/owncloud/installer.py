@@ -11,8 +11,10 @@ from syncloud_platform.systemd.systemctl import remove_service, add_service
 from syncloud_platform.tools import app
 from syncloud_platform.tools.touch import touch
 from syncloud_platform.api import storage, info
-from syncloud_platform.tools import chown, locale
+from syncloud_platform.tools import chown
 from syncloud_platform.api import app as platform_app
+
+from syncloud_platform.gaplib import fs, linux
 
 from owncloud import postgres
 from owncloud.config import Config
@@ -46,7 +48,7 @@ class OwncloudInstaller:
 
         config = Config()
 
-        locale.fix_locale()
+        linux.fix_locale()
 
         chown.chown(USER_NAME, config.install_path())
 
