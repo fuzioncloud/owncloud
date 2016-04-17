@@ -32,6 +32,12 @@ def makepath(path):
     if not isdir(path):
         os.makedirs(path)
 
+from grp import getgrnam
+from pwd import getpwnam
+
+def chownpath(path, user):
+    os.chown(path, getpwnam(user).pw_uid, getgrnam(user).gr_gid)
+
 class OwncloudInstaller:
     def __init__(self):
         self.log = logger.get_logger('owncloud_installer')
@@ -154,7 +160,9 @@ class OwncloudInstaller:
         app_storage_dir = storage.init(APP_NAME, USER_NAME)
         touch(join(app_storage_dir, '.ocdata'))
         check_output('chmod 770 {0}'.format(app_storage_dir), shell=True)
-        app.create_data_dir(app_storage_dir, 'tmp', 'owncloud')
+        tmp_storage_path = join(app_storage_dir, 'tmp')
+        makepath(tmp_storage_path)
+        chownpath(tmp_storage_path, USER_NAME)
 
     def update_domain(self):
         app_domain = '{0}.{1}'.format(APP_NAME, info.domain())
