@@ -27,11 +27,6 @@ INSTALL_USER = 'installer'
 APP_NAME = 'owncloud'
 USER_NAME = 'owncloud'
 
-def makepath(path):
-    if not isdir(path):
-        os.makedirs(path)
-
-
 class OwncloudInstaller:
     def __init__(self):
         self.log = logger.get_logger('owncloud_installer')
@@ -51,8 +46,8 @@ class OwncloudInstaller:
         config_dir = join(app_data_dir, 'config')
         log_dir = join(app_data_dir, 'log')
 
-        makepath(config_dir)
-        makepath(log_dir)
+        fs.makepath(config_dir)
+        fs.makepath(log_dir)
 
         fs.chownpath(app_data_dir, USER_NAME, recursive=True)
 
@@ -157,7 +152,7 @@ class OwncloudInstaller:
         fs.touchfile(join(app_storage_dir, '.ocdata'))
         check_output('chmod 770 {0}'.format(app_storage_dir), shell=True)
         tmp_storage_path = join(app_storage_dir, 'tmp')
-        makepath(tmp_storage_path)
+        fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
 
     def update_domain(self):
