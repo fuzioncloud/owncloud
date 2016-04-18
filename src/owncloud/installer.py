@@ -8,7 +8,6 @@ from subprocess import check_output
 from syncloud_app import logger
 from syncloud_platform.systemd.systemctl import remove_service, add_service
 from syncloud_platform.tools import app
-from syncloud_platform.tools.touch import touch
 from syncloud_platform.api import storage, info
 from syncloud_platform.api import app as platform_app
 
