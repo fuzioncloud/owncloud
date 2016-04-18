@@ -155,7 +155,7 @@ class OwncloudInstaller:
 
     def prepare_storage(self):
         app_storage_dir = storage.init(APP_NAME, USER_NAME)
-        touch(join(app_storage_dir, '.ocdata'))
+        fs.touchfile(join(app_storage_dir, '.ocdata'))
         check_output('chmod 770 {0}'.format(app_storage_dir), shell=True)
         tmp_storage_path = join(app_storage_dir, 'tmp')
         makepath(tmp_storage_path)
