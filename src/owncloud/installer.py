@@ -2,7 +2,6 @@ from os import environ, symlink
 import os
 from os.path import isdir, join, isfile
 import shutil
-from sys import path
 import uuid
 from subprocess import check_output
 
@@ -11,7 +10,6 @@ from syncloud_platform.systemd.systemctl import remove_service, add_service
 from syncloud_platform.tools import app
 from syncloud_platform.tools.touch import touch
 from syncloud_platform.api import storage, info
-from syncloud_platform.tools import chown
 from syncloud_platform.api import app as platform_app
 
 from syncloud_platform.gaplib import fs, linux
@@ -50,7 +48,9 @@ class OwncloudInstaller:
 
         linux.fix_locale()
 
-        chown.chown(USER_NAME, config.install_path())
+        linux.useradd(USER_NAME)
+
+        fs.chownpath(config.install_path(), USER_NAME, recursive=True)
 
         app_data_dir = app.get_app_data_dir(APP_NAME)
 
@@ -60,7 +60,7 @@ class OwncloudInstaller:
         makepath(config_dir)
         makepath(log_dir)
 
-        chown.chown(USER_NAME, app_data_dir)
+        fs.chownpath(app_data_dir, USER_NAME, recursive=True)
 
         symlink(config_dir, config.owncloud_config_link())
 
@@ -86,7 +86,7 @@ class OwncloudInstaller:
 
         self.update_domain()
 
-        chown.chown(USER_NAME, config.app_data_dir())
+        fs.chownpath(config.app_data_dir(), USER_NAME, recursive=True)
 
         platform_app.register_app(APP_NAME, config.port())
 
