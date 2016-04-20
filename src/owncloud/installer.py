@@ -1,5 +1,4 @@
-from os import environ, symlink
-import os
+from os import symlink
 from os.path import isdir, join, isfile
 import shutil
 import uuid
@@ -7,11 +6,10 @@ from subprocess import check_output
 
 from syncloud_app import logger
 from syncloud_platform.systemd.systemctl import remove_service, add_service
-from syncloud_platform.tools import app
 from syncloud_platform.api import storage, info
-from syncloud_platform.api import app as platform_app
 
 from syncloud_platform.gaplib import fs, linux
+from syncloud_platform.application import api
 
 from owncloud import postgres
 from owncloud.config import Config
@@ -39,9 +37,11 @@ class OwncloudInstaller:
 
         linux.useradd(USER_NAME)
 
-        fs.chownpath(config.install_path(), USER_NAME, recursive=True)
+        app_setup = api.get_app_setup(APP_NAME)
 
-        app_data_dir = app.get_app_data_dir(APP_NAME)
+        fs.chownpath(app_setup.get_install_dir(), USER_NAME, recursive=True)
+
+        app_data_dir = app_setup.get_data_dir()
 
         config_dir = join(app_data_dir, 'config')
         log_dir = join(app_data_dir, 'log')
@@ -77,12 +77,13 @@ class OwncloudInstaller:
 
         fs.chownpath(config.app_data_dir(), USER_NAME, recursive=True)
 
-        platform_app.register_app(APP_NAME, config.port())
+        app_setup.register_web(config.port())
 
     def remove(self):
 
         config = Config()
-        platform_app.unregister_app(APP_NAME)
+        app_setup = api.get_app_setup(APP_NAME)
+        app_setup.unregister_web()
         cron = OwncloudCron(config)
         remove_service(SYSTEMD_NGINX_NAME)
         remove_service(SYSTEMD_PHP_FPM_NAME)
