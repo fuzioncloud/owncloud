@@ -38,11 +38,9 @@ class OwncloudInstaller:
 
         linux.useradd(USER_NAME)
 
-        app_setup = api.get_app_setup(APP_NAME)
+        fs.chownpath(self.app.get_install_dir(), USER_NAME, recursive=True)
 
-        fs.chownpath(app_setup.get_install_dir(), USER_NAME, recursive=True)
-
-        app_data_dir = app_setup.get_data_dir()
+        app_data_dir = self.app.get_data_dir()
 
         config_dir = join(app_data_dir, 'config')
         log_dir = join(app_data_dir, 'log')
@@ -59,7 +57,7 @@ class OwncloudInstaller:
         add_service(config.install_path(), SYSTEMD_PHP_FPM_NAME)
         add_service(config.install_path(), SYSTEMD_NGINX_NAME)
 
-        app_storage_dir = app_setup.init_storage(USER_NAME)
+        app_storage_dir = self.app.init_storage(USER_NAME)
         self.prepare_storage(app_storage_dir)
 
         if not self.installed():
@@ -79,13 +77,12 @@ class OwncloudInstaller:
 
         fs.chownpath(config.app_data_dir(), USER_NAME, recursive=True)
 
-        app_setup.register_web(config.port())
+        self.app.register_web(config.port())
 
     def remove(self):
 
         config = Config()
-        app_setup = api.get_app_setup(APP_NAME)
-        app_setup.unregister_web()
+        self.app.unregister_web()
         cron = OwncloudCron(config)
         remove_service(SYSTEMD_NGINX_NAME)
         remove_service(SYSTEMD_PHP_FPM_NAME)
