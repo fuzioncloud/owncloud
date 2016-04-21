@@ -6,7 +6,7 @@ from subprocess import check_output
 
 from syncloud_app import logger
 from syncloud_platform.systemd.systemctl import remove_service, add_service
-from syncloud_platform.api import storage, info
+from syncloud_platform.api import info
 
 from syncloud_platform.gaplib import fs, linux
 from syncloud_platform.application import api
