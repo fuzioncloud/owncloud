@@ -28,6 +28,7 @@ USER_NAME = 'owncloud'
 class OwncloudInstaller:
     def __init__(self):
         self.log = logger.get_logger('owncloud_installer')
+        self.app = api.get_app_setup(APP_NAME)
 
     def install(self):
 
