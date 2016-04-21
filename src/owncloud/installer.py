@@ -6,7 +6,6 @@ from subprocess import check_output
 
 from syncloud_app import logger
 from syncloud_platform.systemd.systemctl import remove_service, add_service
-from syncloud_platform.api import info
 
 from syncloud_platform.gaplib import fs, linux
 from syncloud_platform.application import api
@@ -155,7 +154,7 @@ class OwncloudInstaller:
         fs.chownpath(tmp_storage_path, USER_NAME)
 
     def update_domain(self):
-        app_domain = '{0}.{1}'.format(APP_NAME, info.domain())
+        app_domain = self.app.app_domain_name()
         local_ip = check_output(["hostname", "-I"]).split(" ")[0]
         domains = ['localhost', local_ip, app_domain]
         owncloud_config_set('trusted_domains', " ".join(domains))
