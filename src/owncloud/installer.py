@@ -5,7 +5,6 @@ import uuid
 from subprocess import check_output
 
 from syncloud_app import logger
-from syncloud_platform.systemd.systemctl import remove_service, add_service
 
 from syncloud_platform.gaplib import fs, linux
 from syncloud_platform.application import api
@@ -52,9 +51,9 @@ class OwncloudInstaller:
         symlink(config_dir, config.owncloud_config_link())
 
         print("setup systemd")
-        add_service(config.install_path(), SYSTEMD_POSTGRESQL)
-        add_service(config.install_path(), SYSTEMD_PHP_FPM_NAME)
-        add_service(config.install_path(), SYSTEMD_NGINX_NAME)
+        self.app.add_service(SYSTEMD_POSTGRESQL)
+        self.app.add_service(SYSTEMD_PHP_FPM_NAME)
+        self.app.add_service(SYSTEMD_NGINX_NAME)
 
         app_storage_dir = self.app.init_storage(USER_NAME)
         self.prepare_storage(app_storage_dir)
@@ -83,9 +82,9 @@ class OwncloudInstaller:
         config = Config()
         self.app.unregister_web()
         cron = OwncloudCron(config)
-        remove_service(SYSTEMD_NGINX_NAME)
-        remove_service(SYSTEMD_PHP_FPM_NAME)
-        remove_service(SYSTEMD_POSTGRESQL)
+        self.app.remove_service(SYSTEMD_NGINX_NAME)
+        self.app.remove_service(SYSTEMD_PHP_FPM_NAME)
+        self.app.remove_service(SYSTEMD_POSTGRESQL)
 
         cron.remove()
 
