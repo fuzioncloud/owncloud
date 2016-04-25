@@ -55,8 +55,7 @@ class OwncloudInstaller:
         self.app.add_service(SYSTEMD_PHP_FPM_NAME)
         self.app.add_service(SYSTEMD_NGINX_NAME)
 
-        app_storage_dir = self.app.init_storage(USER_NAME)
-        self.prepare_storage(app_storage_dir)
+        self.prepare_storage()
 
         if not self.installed():
             self.initialize(config)
@@ -145,7 +144,8 @@ class OwncloudInstaller:
 
             occ('user:delete {0}'.format(INSTALL_USER))
 
-    def prepare_storage(self, app_storage_dir):
+    def prepare_storage(self):
+        app_storage_dir = self.app.init_storage(USER_NAME)
         fs.touchfile(join(app_storage_dir, '.ocdata'))
         check_output('chmod 770 {0}'.format(app_storage_dir), shell=True)
         tmp_storage_path = join(app_storage_dir, 'tmp')
