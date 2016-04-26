@@ -46,9 +46,6 @@ class Config:
     def app_data_dir(self):
         return self.parser.get('owncloud', 'app_data_dir')
 
-    def bin_dir(self):
-        return self.parser.get('owncloud', 'bin_dir')
-
     def log_dir(self):
         return self.parser.get('owncloud', 'log_dir')
 

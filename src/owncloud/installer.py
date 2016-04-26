@@ -12,7 +12,7 @@ from syncloud_platform.application import api
 from owncloud.postgres import Database
 from owncloud.config import Config
 from owncloud.cron import OwncloudCron
-from owncloud.octools import occ, owncloud_config_set
+from owncloud.octools import OCConsole, OCConfig
 from owncloud.webface import Setup
 
 SYSTEMD_NGINX_NAME = 'owncloud-nginx'
@@ -24,6 +24,8 @@ USER_NAME = 'owncloud'
 DB_NAME = 'owncloud'
 DB_USER = 'owncloud'
 PSQL_PATH = 'postgresql/bin/psql'
+OCC_RUNNER_PATH = 'bin/occ-runner'
+OC_CONFIG_PATH = 'bin/owncloud-config'
 
 class OwncloudInstaller:
     def __init__(self):
@@ -66,11 +68,12 @@ class OwncloudInstaller:
         cron.remove()
         cron.create()
 
-        owncloud_config_set('memcache.local', '\OC\Memcache\APCu')
-        owncloud_config_set('loglevel', '2')
-        owncloud_config_set('logfile', config.log_file())
-        owncloud_config_set('datadirectory', config.data_dir())
-        owncloud_config_set('integrity.check.disabled', 'true')
+        oc_config = OCConfig(join(self.app.get_install_dir(), OC_CONFIG_PATH))
+        oc_config.set_value('memcache.local', '\OC\Memcache\APCu')
+        oc_config.set_value('loglevel', '2')
+        oc_config.set_value('logfile', config.log_file())
+        oc_config.set_value('datadirectory', config.data_dir())
+        oc_config.set_value('integrity.check.disabled', 'true')
 
         self.update_domain()
 
@@ -108,36 +111,37 @@ class OwncloudInstaller:
 
         Setup().finish(INSTALL_USER, unicode(uuid.uuid4().hex))
 
-        occ('app:enable user_ldap')
+        occ = OCConsole(join(self.app.get_install_dir(), OCC_RUNNER_PATH))
+        occ.run('app:enable user_ldap')
 
         # https://doc.owncloud.org/server/8.0/admin_manual/configuration_server/occ_command.html
         # This is a holdover from the early days, when there was no option to create additional configurations.
         # The second, and all subsequent, configurations that you create are automatically assigned IDs:
-        occ('ldap:create-empty-config')
-        occ('ldap:create-empty-config')
+        occ.run('ldap:create-empty-config')
+        occ.run('ldap:create-empty-config')
 
-        occ('ldap:set-config s01 ldapHost ldap://localhost')
-        occ('ldap:set-config s01 ldapPort 389')
-        occ('ldap:set-config s01 ldapAgentName dc=syncloud,dc=org')
-        occ('ldap:set-config s01 ldapBase dc=syncloud,dc=org')
-        occ('ldap:set-config s01 ldapAgentPassword syncloud')
+        occ.run('ldap:set-config s01 ldapHost ldap://localhost')
+        occ.run('ldap:set-config s01 ldapPort 389')
+        occ.run('ldap:set-config s01 ldapAgentName dc=syncloud,dc=org')
+        occ.run('ldap:set-config s01 ldapBase dc=syncloud,dc=org')
+        occ.run('ldap:set-config s01 ldapAgentPassword syncloud')
 
-        occ('ldap:set-config s01 ldapLoginFilter "(&(|(objectclass=inetOrgPerson))(uid=%uid))"')
+        occ.run('ldap:set-config s01 ldapLoginFilter "(&(|(objectclass=inetOrgPerson))(uid=%uid))"')
 
-        occ('ldap:set-config s01 ldapUserFilterObjectclass inetOrgPerson')
-        occ('ldap:set-config s01 ldapBaseUsers ou=users,dc=syncloud,dc=org')
-        occ('ldap:set-config s01 ldapUserDisplayName cn')
-        occ('ldap:set-config s01 ldapExpertUsernameAttr cn')
+        occ.run('ldap:set-config s01 ldapUserFilterObjectclass inetOrgPerson')
+        occ.run('ldap:set-config s01 ldapBaseUsers ou=users,dc=syncloud,dc=org')
+        occ.run('ldap:set-config s01 ldapUserDisplayName cn')
+        occ.run('ldap:set-config s01 ldapExpertUsernameAttr cn')
 
-        occ('ldap:set-config s01 ldapGroupFilterObjectclass posixGroup')
-        occ('ldap:set-config s01 ldapGroupDisplayName cn')
-        occ('ldap:set-config s01 ldapBaseGroups ou=groups,dc=syncloud,dc=org')
-        occ('ldap:set-config s01 ldapGroupFilter "(&(|(objectclass=posixGroup)))"')
-        occ('ldap:set-config s01 ldapGroupMemberAssocAttr memberUid')
+        occ.run('ldap:set-config s01 ldapGroupFilterObjectclass posixGroup')
+        occ.run('ldap:set-config s01 ldapGroupDisplayName cn')
+        occ.run('ldap:set-config s01 ldapBaseGroups ou=groups,dc=syncloud,dc=org')
+        occ.run('ldap:set-config s01 ldapGroupFilter "(&(|(objectclass=posixGroup)))"')
+        occ.run('ldap:set-config s01 ldapGroupMemberAssocAttr memberUid')
 
-        occ('ldap:set-config s01 ldapTLS 0')
-        occ('ldap:set-config s01 turnOffCertCheck 1')
-        occ('ldap:set-config s01 ldapConfigurationActive 1')
+        occ.run('ldap:set-config s01 ldapTLS 0')
+        occ.run('ldap:set-config s01 turnOffCertCheck 1')
+        occ.run('ldap:set-config s01 ldapConfigurationActive 1')
 
         cron_cmd = config.cron_cmd()
         self.log.info("running: {0}".format(cron_cmd))
@@ -147,7 +151,7 @@ class OwncloudInstaller:
         db_owncloud.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
         db_owncloud.execute("update oc_ldap_group_members set owncloudname = 'admin';")
 
-        occ('user:delete {0}'.format(INSTALL_USER))
+        occ.run('user:delete {0}'.format(INSTALL_USER))
 
     def prepare_storage(self):
         app_storage_dir = self.app.init_storage(USER_NAME)
@@ -161,4 +165,5 @@ class OwncloudInstaller:
         app_domain = self.app.app_domain_name()
         local_ip = check_output(["hostname", "-I"]).split(" ")[0]
         domains = ['localhost', local_ip, app_domain]
-        owncloud_config_set('trusted_domains', " ".join(domains))
+        oc_config = OCConfig(join(self.app.get_install_dir(), OC_CONFIG_PATH))
+        oc_config.set_value('trusted_domains', " ".join(domains))
