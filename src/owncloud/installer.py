@@ -28,6 +28,7 @@ OCC_RUNNER_PATH = 'bin/occ-runner'
 OC_CONFIG_PATH = 'bin/owncloud-config'
 CRON_CMD = 'bin/owncloud-cron'
 CRON_USER = 'owncloud'
+OWNCLOUD_CONFIG_PATH = 'owncloud/config'
 
 class OwncloudInstaller:
     def __init__(self):
@@ -46,15 +47,16 @@ class OwncloudInstaller:
 
         app_data_dir = self.app.get_data_dir()
 
-        config_dir = join(app_data_dir, 'config')
+        config_data_dir = join(app_data_dir, 'config')
         log_dir = join(app_data_dir, 'log')
 
-        fs.makepath(config_dir)
+        fs.makepath(config_data_dir)
         fs.makepath(log_dir)
 
         fs.chownpath(app_data_dir, USER_NAME, recursive=True)
 
-        symlink(config_dir, config.owncloud_config_link())
+        config_app_dir = join(self.app.get_install_dir(), OWNCLOUD_CONFIG_PATH)
+        symlink(config_data_dir, config_app_dir)
 
         print("setup systemd")
         self.app.add_service(SYSTEMD_POSTGRESQL)

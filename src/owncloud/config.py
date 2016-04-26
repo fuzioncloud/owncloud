@@ -22,18 +22,6 @@ class Config:
     def config_file(self):
         return self.parser.get('owncloud', 'config_file')
 
-    def site_config_file(self):
-        return self.parser.get('owncloud', 'site_config_file')
-
-    def site_name(self):
-        return self.parser.get('owncloud', 'site_name')
-
-    def install_path(self):
-        return self.parser.get('owncloud', 'install_path')
-
-    def original_config_dir(self):
-        return self.parser.get('owncloud', 'original_config_dir')
-
     def data_dir(self):
         return self.parser.get('owncloud', 'data_dir')
 
@@ -48,7 +36,3 @@ class Config:
 
     def root_path(self):
         return self.parser.get('owncloud', 'root_path')
-
-    def owncloud_config_link(self):
-        return self.parser.get('owncloud', 'owncloud_config_link')
-
