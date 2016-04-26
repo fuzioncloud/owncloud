@@ -34,12 +34,6 @@ class Config:
     def original_config_dir(self):
         return self.parser.get('owncloud', 'original_config_dir')
 
-    def cron_user(self):
-        return self.parser.get('owncloud', 'cron_user')
-
-    def cron_cmd(self):
-        return self.parser.get('owncloud', 'cron_cmd')
-
     def data_dir(self):
         return self.parser.get('owncloud', 'data_dir')
 

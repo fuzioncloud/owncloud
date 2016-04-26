@@ -26,6 +26,8 @@ DB_USER = 'owncloud'
 PSQL_PATH = 'postgresql/bin/psql'
 OCC_RUNNER_PATH = 'bin/occ-runner'
 OC_CONFIG_PATH = 'bin/owncloud-config'
+CRON_CMD = 'bin/owncloud-cron'
+CRON_USER = 'owncloud'
 
 class OwncloudInstaller:
     def __init__(self):
@@ -64,7 +66,7 @@ class OwncloudInstaller:
         if not self.installed():
             self.initialize(config)
 
-        cron = OwncloudCron(config)
+        cron = OwncloudCron(join(self.app.get_install_dir(), CRON_CMD), CRON_USER)
         cron.remove()
         cron.create()
 
@@ -85,7 +87,7 @@ class OwncloudInstaller:
 
         config = Config()
         self.app.unregister_web()
-        cron = OwncloudCron(config)
+        cron = OwncloudCron(join(self.app.get_install_dir(), CRON_CMD), CRON_USER)
         self.app.remove_service(SYSTEMD_NGINX_NAME)
         self.app.remove_service(SYSTEMD_PHP_FPM_NAME)
         self.app.remove_service(SYSTEMD_POSTGRESQL)
@@ -143,9 +145,8 @@ class OwncloudInstaller:
         occ.run('ldap:set-config s01 turnOffCertCheck 1')
         occ.run('ldap:set-config s01 ldapConfigurationActive 1')
 
-        cron_cmd = config.cron_cmd()
-        self.log.info("running: {0}".format(cron_cmd))
-        self.log.info(check_output('sudo -H -u {0} {1}'.format(config.cron_user(), cron_cmd), shell=True))
+        cron = OwncloudCron(join(self.app.get_install_dir(), CRON_CMD), CRON_USER)
+        cron.run()
 
         db_owncloud = Database(join(self.app.get_install_dir(), PSQL_PATH), database=DB_NAME, user=DB_USER)
         db_owncloud.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
