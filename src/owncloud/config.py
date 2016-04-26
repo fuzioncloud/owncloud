@@ -58,9 +58,6 @@ class Config:
     def root_path(self):
         return self.parser.get('owncloud', 'root_path')
 
-    def psql(self):
-        return self.parser.get('owncloud', 'psql')
-
     def owncloud_config_link(self):
         return self.parser.get('owncloud', 'owncloud_config_link')
 
