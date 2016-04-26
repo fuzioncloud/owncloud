@@ -12,8 +12,7 @@ from syncloud_platform.application import api
 from owncloud.postgres import Database
 from owncloud.config import Config
 from owncloud.cron import OwncloudCron
-from owncloud.occ import occ
-from owncloud.occonfig import owncloud_config_set
+from owncloud.octools import occ, owncloud_config_set
 from owncloud.webface import Setup
 
 SYSTEMD_NGINX_NAME = 'owncloud-nginx'
