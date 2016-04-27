@@ -19,9 +19,6 @@ class Config:
     def url(self):
         return self.parser.get('owncloud', 'url')
 
-    def config_file(self):
-        return self.parser.get('owncloud', 'config_file')
-
     def data_dir(self):
         return self.parser.get('owncloud', 'data_dir')
 

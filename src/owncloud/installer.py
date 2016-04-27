@@ -28,7 +28,8 @@ OCC_RUNNER_PATH = 'bin/occ-runner'
 OC_CONFIG_PATH = 'bin/owncloud-config'
 CRON_CMD = 'bin/owncloud-cron'
 CRON_USER = 'owncloud'
-OWNCLOUD_CONFIG_PATH = 'owncloud/config'
+OWNCLOUD_APP_CONFIG_PATH = 'owncloud/config'
+OWNCLOUD_DATA_CONFIG_FILE_PATH = 'config/config.php'
 
 class OwncloudInstaller:
     def __init__(self):
@@ -55,7 +56,7 @@ class OwncloudInstaller:
 
         fs.chownpath(app_data_dir, USER_NAME, recursive=True)
 
-        config_app_dir = join(self.app.get_install_dir(), OWNCLOUD_CONFIG_PATH)
+        config_app_dir = join(self.app.get_install_dir(), OWNCLOUD_APP_CONFIG_PATH)
         symlink(config_data_dir, config_app_dir)
 
         print("setup systemd")
@@ -100,11 +101,12 @@ class OwncloudInstaller:
             shutil.rmtree(self.app.get_install_dir())
 
     def installed(self):
+        config_file = join(self.app.get_data_dir(), OWNCLOUD_DATA_CONFIG_FILE_PATH)
         config = Config()
-        if not isfile(config.config_file()):
+        if not isfile(config_file):
             return False
 
-        return 'installed' in open(config.config_file()).read().strip()
+        return 'installed' in open(config_file).read().strip()
 
     def initialize(self, config):
 
