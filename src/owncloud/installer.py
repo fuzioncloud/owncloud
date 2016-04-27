@@ -10,7 +10,6 @@ from syncloud_platform.gaplib import fs, linux
 from syncloud_platform.application import api
 
 from owncloud.postgres import Database
-from owncloud.config import Config
 from owncloud.cron import OwncloudCron
 from owncloud.octools import OCConsole, OCConfig
 from owncloud.webface import Setup
@@ -26,10 +25,12 @@ DB_USER = 'owncloud'
 PSQL_PATH = 'postgresql/bin/psql'
 OCC_RUNNER_PATH = 'bin/occ-runner'
 OC_CONFIG_PATH = 'bin/owncloud-config'
+OWNCLOUD_LOG_PATH = 'log/owncloud.log'
 CRON_CMD = 'bin/owncloud-cron'
 CRON_USER = 'owncloud'
 OWNCLOUD_APP_CONFIG_PATH = 'owncloud/config'
 OWNCLOUD_DATA_CONFIG_FILE_PATH = 'config/config.php'
+OWNCLOUD_PORT = 1082
 
 class OwncloudInstaller:
     def __init__(self):
@@ -37,8 +38,6 @@ class OwncloudInstaller:
         self.app = api.get_app_setup(APP_NAME)
 
     def install(self):
-
-        config = Config()
 
         linux.fix_locale()
 
@@ -67,7 +66,7 @@ class OwncloudInstaller:
         self.prepare_storage()
 
         if not self.installed():
-            self.initialize(config)
+            self.initialize()
 
         cron = OwncloudCron(join(self.app.get_install_dir(), CRON_CMD), CRON_USER)
         cron.remove()
@@ -76,19 +75,18 @@ class OwncloudInstaller:
         oc_config = OCConfig(join(self.app.get_install_dir(), OC_CONFIG_PATH))
         oc_config.set_value('memcache.local', '\OC\Memcache\APCu')
         oc_config.set_value('loglevel', '2')
-        oc_config.set_value('logfile', config.log_file())
-        oc_config.set_value('datadirectory', config.data_dir())
+        oc_config.set_value('logfile', join(self.app.get_data_dir(), OWNCLOUD_LOG_PATH))
+        oc_config.set_value('datadirectory', self.app.get_storage_dir())
         oc_config.set_value('integrity.check.disabled', 'true')
 
         self.update_domain()
 
-        fs.chownpath(config.app_data_dir(), USER_NAME, recursive=True)
+        fs.chownpath(self.app.get_data_dir(), USER_NAME, recursive=True)
 
-        self.app.register_web(config.port())
+        self.app.register_web(OWNCLOUD_PORT)
 
     def remove(self):
 
-        config = Config()
         self.app.unregister_web()
         cron = OwncloudCron(join(self.app.get_install_dir(), CRON_CMD), CRON_USER)
         self.app.remove_service(SYSTEMD_NGINX_NAME)
@@ -101,21 +99,22 @@ class OwncloudInstaller:
             shutil.rmtree(self.app.get_install_dir())
 
     def installed(self):
+
         config_file = join(self.app.get_data_dir(), OWNCLOUD_DATA_CONFIG_FILE_PATH)
-        config = Config()
         if not isfile(config_file):
             return False
 
         return 'installed' in open(config_file).read().strip()
 
-    def initialize(self, config):
+    def initialize(self):
 
         print("initialization")
 
         db_postgres = Database(join(self.app.get_install_dir(), PSQL_PATH), database='postgres', user=DB_USER)
         db_postgres.execute("ALTER USER owncloud WITH PASSWORD 'owncloud';")
 
-        Setup().finish(INSTALL_USER, unicode(uuid.uuid4().hex))
+        web_setup = Setup(OWNCLOUD_PORT)
+        web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), self.app.get_storage_dir())
 
         occ = OCConsole(join(self.app.get_install_dir(), OCC_RUNNER_PATH))
         occ.run('app:enable user_ldap')
