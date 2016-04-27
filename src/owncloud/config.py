@@ -1,7 +1,6 @@
 from ConfigParser import ConfigParser
-from os.path import join
 
-default_config_file = join(default_config_path, 'owncloud-ctl.cfg')
+default_config_file = '/opt/app/owncloud/config/owncloud-ctl.cfg'
 
 
 class Config:
