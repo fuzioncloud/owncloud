@@ -58,6 +58,11 @@ class OwncloudInstaller:
         config_app_dir = join(self.app.get_install_dir(), OWNCLOUD_APP_CONFIG_PATH)
         symlink(config_data_dir, config_app_dir)
 
+        database_path = join(self.app.get_data_dir(), 'database')
+        if not isdir(database_path):
+            psql_initdb = join(self.app.get_install_dir(), 'postgresql/bin/initdb')
+            check_output(['sudo', '-H', '-u', USER_NAME, psql_initdb, database_path])
+
         print("setup systemd")
         self.app.add_service(SYSTEMD_POSTGRESQL)
         self.app.add_service(SYSTEMD_PHP_FPM_NAME)
@@ -109,6 +114,8 @@ class OwncloudInstaller:
     def initialize(self):
 
         print("initialization")
+
+        print("creating database files")
 
         db_postgres = Database(join(self.app.get_install_dir(), PSQL_PATH), database='postgres', user=DB_USER)
         db_postgres.execute("ALTER USER owncloud WITH PASSWORD 'owncloud';")
