@@ -6,7 +6,7 @@ from subprocess import check_output
 
 from syncloud_app import logger
 
-from syncloud_platform.gaplib import fs, linux
+from syncloud_platform.gaplib import fs, linux, gen
 from syncloud_platform.application import api
 
 from owncloud.postgres import Database
@@ -43,9 +43,18 @@ class OwncloudInstaller:
 
         linux.useradd(USER_NAME)
 
-        fs.chownpath(self.app.get_install_dir(), USER_NAME, recursive=True)
+        templates_path = join(self.app.get_install_dir(), 'templates')
+        config_path = join(self.app.get_install_dir(), 'config')
 
         app_data_dir = self.app.get_data_dir()
+
+        variables = {
+            'app_dir': self.app.get_install_dir(),
+            'app_data_dir': app_data_dir,
+            'web_port': OWNCLOUD_PORT
+        }
+        gen.generate_files(templates_path, config_path, variables)
+        fs.chownpath(self.app.get_install_dir(), USER_NAME, recursive=True)
 
         config_data_dir = join(app_data_dir, 'config')
         log_dir = join(app_data_dir, 'log')
