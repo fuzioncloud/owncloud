@@ -110,6 +110,11 @@ def test_web_with_selenium(user_domain):
     driver = webdriver.Firefox()
     driver.get("http://{0}".format(user_domain))
     #print_browser_logs(driver)
+    user = driver.find_element_by_id("user")
+    user.send_keys(DEVICE_USER)
+    password = driver.find_element_by_id("password")
+    password.send_keys(DEVICE_PASSWORD)
+    password.s submit()
 
     screenshot_dir = join(DIR, 'screenshot')
     if exists(screenshot_dir):
