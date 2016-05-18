@@ -2,7 +2,7 @@ import json
 import os
 import sys
 from os import listdir
-from os.path import dirname, join, abspath, isdir
+from os.path import dirname, join, exists, abspath, isdir
 import time
 from subprocess import check_output
 from selenium import webdriver
