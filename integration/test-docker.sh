@@ -10,6 +10,7 @@ fi
 
 ./docker.sh
 
-apt-get install -y sshpass owncloud-client-cmd
+apt-get install -y sshpass owncloud-client-cmd fitefox xvfb
+pip2 install -r ${DIR}/../src/dev_requirements.txt
 pip2 install -U pytest
-py.test -x -s verify.py --email=$1 --password=$2 --domain=$3 --release=$4 --app-version=$5 --arch=$6
+xvfb-run py.test -x -s verify.py --email=$1 --password=$2 --domain=$3 --release=$4 --app-version=$5 --arch=$6
