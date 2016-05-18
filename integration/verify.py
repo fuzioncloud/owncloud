@@ -114,7 +114,7 @@ def test_web_with_selenium(user_domain):
     user.send_keys(DEVICE_USER)
     password = driver.find_element_by_id("password")
     password.send_keys(DEVICE_PASSWORD)
-    password.s submit()
+    password.submit()
 
     screenshot_dir = join(DIR, 'screenshot')
     if exists(screenshot_dir):
