@@ -2,16 +2,15 @@ import requests
 import re
 from bs4 import BeautifulSoup
 from syncloud_app import logger
-from owncloud.config import Config
 
 
 class Setup:
-    def __init__(self):
+    def __init__(self, port):
         self.log = logger.get_logger('owncloud.setup.finish')
-        self.config = Config()
-        self.index_url = 'http://localhost:{}/index.php'.format(self.config.port())
+        self.port = port
+        self.index_url = 'http://localhost:{}/index.php'.format(port)
 
-    def finish(self, login, password):
+    def finish(self, login, password, data_dir):
 
         if self.is_finished():
             return True
@@ -24,7 +23,7 @@ class Setup:
                                      'adminpass': password, 'adminpass-clone': password,
                                      'dbtype': 'pgsql', 'dbname': 'owncloud',
                                      'dbuser': 'owncloud', 'dbpass': 'owncloud',
-                                     'dbhost': 'localhost', 'directory': self.config.data_dir()}, allow_redirects=False)
+                                     'dbhost': 'localhost', 'directory': data_dir}, allow_redirects=False)
 
         if response.status_code == 302:
             self.log.info("successful login redirect")
