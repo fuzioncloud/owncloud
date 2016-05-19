@@ -14,9 +14,7 @@ def test_web_with_selenium(user_domain):
     password.send_keys(DEVICE_PASSWORD)
     password.submit()
     wait_driver = WebDriverWait(driver, 10)
-
-   wait_driver.until(EC.text_to_be_present_in_element(
-               (By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
+    wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
 
     screenshot_dir = join(DIR, 'screenshot')
     if exists(screenshot_dir):
