@@ -4,6 +4,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+DEVICE_USER = 'user'
+DEVICE_PASSWORD = 'password'
+
+
 def test_web_with_selenium(user_domain):
     driver = webdriver.Firefox()
     driver.get("http://{0}".format(user_domain))
