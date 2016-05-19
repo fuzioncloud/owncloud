@@ -3,6 +3,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from os.path import dirname, join, exists, abspath, isdir
+import os
+import sys
+import shutil
+
 
 DEVICE_USER = 'user'
 DEVICE_PASSWORD = 'password'
