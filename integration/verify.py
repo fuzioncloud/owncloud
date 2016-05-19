@@ -5,8 +5,6 @@ from os import listdir
 from os.path import dirname, join, exists, abspath, isdir
 import time
 from subprocess import check_output
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 import pytest
 import shutil
 
@@ -105,22 +103,6 @@ def test_activate_device(auth):
 
 def test_install(auth):
     __local_install(auth)
-
-def test_web_with_selenium(user_domain):
-    driver = webdriver.Firefox()
-    driver.get("http://{0}".format(user_domain))
-    #print_browser_logs(driver)
-    user = driver.find_element_by_id("user")
-    user.send_keys(DEVICE_USER)
-    password = driver.find_element_by_id("password")
-    password.send_keys(DEVICE_PASSWORD)
-    password.submit()
-
-    screenshot_dir = join(DIR, 'screenshot')
-    if exists(screenshot_dir):
-        shutil.rmtree(screenshot_dir)
-    os.mkdir(screenshot_dir)
-    driver.get_screenshot_as_file(join(screenshot_dir, 'admin.png'))
 
 def test_resource(owncloud_session_domain, user_domain):
     session, _ = owncloud_session_domain
