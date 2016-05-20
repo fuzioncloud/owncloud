@@ -9,6 +9,7 @@ import sys
 import shutil
 
 
+DIR = dirname(__file__)
 DEVICE_USER = 'user'
 DEVICE_PASSWORD = 'password'
 
