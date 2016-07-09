@@ -7,7 +7,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=owncloud
-OWNCLOUD_VERSION=9.0.2
+OWNCLOUD_VERSION=9.0.3
 COIN_CACHE_DIR=${DIR}/coin.cache
 ARCH=$(dpkg-architecture -qDEB_HOST_GNU_CPU)
 if [ ! -z "$1" ]; then

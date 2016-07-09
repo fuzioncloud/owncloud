@@ -7,17 +7,27 @@ from os.path import dirname, join, exists, abspath, isdir
 import os
 import sys
 import shutil
-
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 DIR = dirname(__file__)
+LOG_DIR = join(DIR, 'log')
 DEVICE_USER = 'user'
 DEVICE_PASSWORD = 'password'
+log_dir = join(LOG_DIR, 'owncloud_log')
 
 
 def test_web_with_selenium(user_domain):
-    driver = webdriver.Firefox()
+
+    os.environ['PATH'] = os.environ['PATH'] + ":" + join(DIR, 'geckodriver')
+
+    caps = DesiredCapabilities.FIREFOX
+    caps["marionette"] = True
+    caps["binary"] = "/usr/bin/firefox"
+
+    profile = webdriver.FirefoxProfile()
+    profile.set_preference("webdriver.log.file", "{0}/firefox.log".format(log_dir))
+    driver = webdriver.Firefox(profile, capabilities=caps)
     driver.get("http://{0}".format(user_domain))
-    #print_browser_logs(driver)
     user = driver.find_element_by_id("user")
     user.send_keys(DEVICE_USER)
     password = driver.find_element_by_id("password")

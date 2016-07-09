@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -e
 
 ROOTFS=/tmp/owncloud/rootfs
 APP_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
@@ -36,8 +36,11 @@ function cleanup {
     docker images -q
 
     echo "removing images"
-    docker rm $(docker kill $(docker ps -qa))
+    set +e
+    docker kill $(docker ps -qa)
+    docker rm $(docker ps -qa)
     docker rmi $(docker images -q)
+    set -e
 
     echo "docker images"
     docker images -q
@@ -59,6 +62,7 @@ docker run --net host -v /var/run/dbus:/var/run/dbus --name rootfs --privileged 
 
 ssh-keygen -f "/root/.ssh/known_hosts" -R [localhost]:2222
 
+set +e
 sshpass -p syncloud ssh -o StrictHostKeyChecking=no -p 2222 root@localhost date
 while test $? -gt 0
 do
@@ -66,5 +70,7 @@ do
   echo "Waiting for SSH ..."
   sshpass -p syncloud ssh -o StrictHostKeyChecking=no -p 2222 root@localhost date
 done
+echo 'ssh is ready'
+set -e
 
 ssh-keygen -f "/root/.ssh/known_hosts" -R [localhost]:2222
