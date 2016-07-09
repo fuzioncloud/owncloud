@@ -1,13 +1,13 @@
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from os.path import dirname, join, exists, abspath, isdir
 import os
-import sys
 import shutil
+from os.path import dirname, join, exists
+
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 DIR = dirname(__file__)
 LOG_DIR = join(DIR, 'log')
@@ -40,4 +40,5 @@ def test_web_with_selenium(user_domain):
     if exists(screenshot_dir):
         shutil.rmtree(screenshot_dir)
     os.mkdir(screenshot_dir)
+    time.sleep(2)
     driver.get_screenshot_as_file(join(screenshot_dir, 'admin.png'))
