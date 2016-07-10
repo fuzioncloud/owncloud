@@ -165,6 +165,14 @@ def test_verification(owncloud_session_domain, user_domain):
     assert 'EXCEPTION' not in response.text
 
 
+# def test_integrity(owncloud_session_domain, user_domain):
+#     session, _ = owncloud_session_domain
+#     response = session.get('http://{0}/index.php/settings/ajax/checksetup'.format(user_domain), allow_redirects=False)
+#     print(response.text)
+#     assert response.status_code == 200, response.text
+#     assert not json.loads(response.text)['hasPassedCodeIntegrityCheck'], 'you can fix me now'
+
+
 def test_disk(syncloud_session, user_domain):
 
     loop_device_cleanup(0, DEVICE_PASSWORD)
