@@ -44,7 +44,7 @@ mkdir build/${NAME}/META
 echo ${NAME} >> build/${NAME}/META/app
 echo ${VERSION} >> build/${NAME}/META/version
 
-echo "patching filemtime fr huge file support on 32 bit php (with special compile flags)"
+echo "patching filemtime for huge file support on 32 bit php (with special compile flags)"
 cd ${BUILD_DIR}/owncloud
 patch -p0 < ${DIR}/patches/filemtime.patch
 
