@@ -183,7 +183,7 @@ def test_disk(syncloud_session, user_domain):
     __create_test_dir('test0', user_domain)
     __check_test_dir(owncloud_session_domain(user_domain), 'test0', user_domain)
 
-    device1 = loop_device_add('ntfs', 1, DEVICE_PASSWORD)
+    device1 = loop_device_add('ext2', 1, DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device1)
     __create_test_dir('test1', user_domain)
     __check_test_dir(owncloud_session_domain(user_domain), 'test1', user_domain)
