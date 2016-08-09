@@ -7,7 +7,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=owncloud
-OWNCLOUD_VERSION=9.0.0
+OWNCLOUD_VERSION=9.0.4
 
 ARCH=$(dpkg-architecture -qDEB_HOST_GNU_CPU)
 if [ ! -z "$1" ]; then
