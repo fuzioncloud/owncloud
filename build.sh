@@ -7,8 +7,8 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=owncloud
-OWNCLOUD_VERSION=9.0.0
-
+OWNCLOUD_VERSION=9.0.4
+COIN_CACHE_DIR=${DIR}/coin.cache
 ARCH=$(dpkg-architecture -qDEB_HOST_GNU_CPU)
 if [ ! -z "$1" ]; then
     ARCH=$1
@@ -35,7 +35,7 @@ coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_postgresql_${ARCH}/lastSuc
 coin --to ${BUILD_DIR} raw https://download.owncloud.org/community/${NAME}-${OWNCLOUD_VERSION}.tar.bz2
 
 cp -r bin ${BUILD_DIR}
-cp -r config ${BUILD_DIR}
+cp -r templates ${BUILD_DIR}
 cp -r lib ${BUILD_DIR}
 
 rm -rf ${BUILD_DIR}/owncloud/config
@@ -44,7 +44,7 @@ mkdir build/${NAME}/META
 echo ${NAME} >> build/${NAME}/META/app
 echo ${VERSION} >> build/${NAME}/META/version
 
-echo "patching"
+echo "patching filemtime for huge file support on 32 bit php (with special compile flags)"
 cd ${BUILD_DIR}/owncloud
 patch -p0 < ${DIR}/patches/filemtime.patch
 

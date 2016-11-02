@@ -2,10 +2,9 @@ import json
 import os
 import sys
 from os import listdir
-from os.path import dirname, join, abspath, isdir
+from os.path import dirname, join, exists, abspath, isdir
 import time
 from subprocess import check_output
-
 import pytest
 import shutil
 
@@ -51,16 +50,10 @@ def module_teardown():
     print('-------------------------------------------------------')
 
 
-@pytest.fixture(scope='module')
-def user_domain(auth):
-    email, password, domain, release, version, arch = auth
-    return 'owncloud.{0}.{1}'.format(domain, SYNCLOUD_INFO)
-
-
 @pytest.fixture(scope='function')
 def syncloud_session():
     session = requests.session()
-    session.post('http://localhost/server/rest/login', data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD})
+    session.post('http://localhost/rest/login', data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD})
     return session
 
 
@@ -88,7 +81,7 @@ def test_activate_device(auth):
     run_ssh('/opt/app/sam/bin/sam update --release {0}'.format(release), password=DEFAULT_DEVICE_PASSWORD)
     run_ssh('/opt/app/sam/bin/sam --debug upgrade platform', password=DEFAULT_DEVICE_PASSWORD)
 
-    response = requests.post('http://localhost:81/server/rest/activate',
+    response = requests.post('http://localhost:81/rest/activate',
                              data={'main_domain': SYNCLOUD_INFO, 'redirect_email': email, 'redirect_password': password,
                                    'user_domain': domain, 'device_username': DEVICE_USER, 'device_password': DEVICE_PASSWORD})
     assert response.status_code == 200, response.text
@@ -104,7 +97,6 @@ def test_activate_device(auth):
 
 def test_install(auth):
     __local_install(auth)
-
 
 def test_resource(owncloud_session_domain, user_domain):
     session, _ = owncloud_session_domain
@@ -164,6 +156,23 @@ def test_admin(owncloud_session_domain, user_domain):
     assert response.status_code == 200, response.text
 
 
+def test_verification(owncloud_session_domain, user_domain):
+    session, _ = owncloud_session_domain
+    response = session.get('http://{0}/index.php/settings/integrity/failed'.format(user_domain), allow_redirects=False)
+    print(response.text)
+    assert response.status_code == 200, response.text
+    assert 'INVALID_HASH' not in response.text
+    assert 'EXCEPTION' not in response.text
+
+
+# def test_integrity(owncloud_session_domain, user_domain):
+#     session, _ = owncloud_session_domain
+#     response = session.get('http://{0}/index.php/settings/ajax/checksetup'.format(user_domain), allow_redirects=False)
+#     print(response.text)
+#     assert response.status_code == 200, response.text
+#     assert not json.loads(response.text)['hasPassedCodeIntegrityCheck'], 'you can fix me now'
+
+
 def test_disk(syncloud_session, user_domain):
 
     loop_device_cleanup(0, DEVICE_PASSWORD)
@@ -174,7 +183,7 @@ def test_disk(syncloud_session, user_domain):
     __create_test_dir('test0', user_domain)
     __check_test_dir(owncloud_session_domain(user_domain), 'test0', user_domain)
 
-    device1 = loop_device_add('ntfs', 1, DEVICE_PASSWORD)
+    device1 = loop_device_add('ext2', 1, DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device1)
     __create_test_dir('test1', user_domain)
     __check_test_dir(owncloud_session_domain(user_domain), 'test1', user_domain)
@@ -187,7 +196,7 @@ def test_disk(syncloud_session, user_domain):
 
 
 def __activate_disk(syncloud_session, loop_device):
-    response = syncloud_session.get('http://localhost/server/rest/settings/disk_activate',
+    response = syncloud_session.get('http://localhost/rest/settings/disk_activate',
                                     params={'device': loop_device}, allow_redirects=False)
     files_scan()
     assert response.status_code == 200, response.text
@@ -217,7 +226,7 @@ def __check_test_dir(owncloud_session, test_dir, user_domain):
 
 
 def test_remove(syncloud_session):
-    response = syncloud_session.get('http://localhost/server/rest/remove?app_id=owncloud', allow_redirects=False)
+    response = syncloud_session.get('http://localhost/rest/remove?app_id=owncloud', allow_redirects=False)
     assert response.status_code == 200, response.text
 
 
