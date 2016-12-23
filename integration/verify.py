@@ -60,10 +60,10 @@ def syncloud_session():
 @pytest.fixture(scope='function')
 def owncloud_session_domain(user_domain):
     session = requests.session()
-    response = session.get('http://127.0.0.1', headers={"Host": user_domain}, allow_redirects=False)
+    response = session.get('http://127.0.0.1/index.php/login', headers={"Host": user_domain}, allow_redirects=False)
     soup = BeautifulSoup(response.text, "html.parser")
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
-    response = session.post('http://127.0.0.1/index.php',
+    response = session.post('http://127.0.0.1/index.php/login',
                             headers={"Host": user_domain},
                             data={'user': DEVICE_USER, 'password': DEVICE_PASSWORD, 'requesttoken': requesttoken},
                             allow_redirects=False)
