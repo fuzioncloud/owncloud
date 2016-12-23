@@ -22,20 +22,36 @@ APP_NAME = 'owncloud'
 USER_NAME = 'owncloud'
 DB_NAME = 'owncloud'
 DB_USER = 'owncloud'
+DB_PASSWORD = 'owncloud'
 PSQL_PATH = 'postgresql/bin/psql'
 OCC_RUNNER_PATH = 'bin/occ-runner'
 OC_CONFIG_PATH = 'bin/owncloud-config'
 OWNCLOUD_LOG_PATH = 'log/owncloud.log'
 CRON_CMD = 'bin/owncloud-cron'
 CRON_USER = 'owncloud'
-OWNCLOUD_APP_CONFIG_PATH = 'owncloud/config'
-OWNCLOUD_DATA_CONFIG_FILE_PATH = 'config/config.php'
-OWNCLOUD_PORT = 1082
+APP_CONFIG_PATH = 'owncloud/config'
+DATA_CONFIG_FILE_PATH = 'config/config.php'
+WEB_PORT = 1082
+
+
+def database_init(logger, app_install_dir, app_data_dir, user_name):
+    database_path = join(app_data_dir, 'database')
+    if not isdir(database_path):
+        psql_initdb = join(app_install_dir, 'postgresql/bin/initdb')
+        logger.info(check_output(['sudo', '-H', '-u', user_name, psql_initdb, database_path]))
+        postgresql_conf_to = join(database_path, 'postgresql.conf')
+        postgresql_conf_from = join(app_install_dir, 'config', 'postgresql.conf')
+        shutil.copy(postgresql_conf_from, postgresql_conf_to)
+    else:
+        logger.info('Database path "{0}" already exists'.format(database_path))
+
 
 class OwncloudInstaller:
     def __init__(self):
         self.log = logger.get_logger('owncloud_installer')
         self.app = api.get_app_setup(APP_NAME)
+        self.database_path = join(self.app.get_data_dir(), 'database')
+        self.occ = OCConsole(join(self.app.get_install_dir(), OCC_RUNNER_PATH))
 
     def install(self):
 
@@ -43,7 +59,7 @@ class OwncloudInstaller:
 
         linux.useradd(USER_NAME)
 
-        templates_path = join(self.app.get_install_dir(), 'templates')
+        templates_path = join(self.app.get_install_dir(), 'config.templates')
         config_path = join(self.app.get_install_dir(), 'config')
 
         app_data_dir = self.app.get_data_dir()
@@ -51,7 +67,7 @@ class OwncloudInstaller:
         variables = {
             'app_dir': self.app.get_install_dir(),
             'app_data_dir': app_data_dir,
-            'web_port': OWNCLOUD_PORT
+            'web_port': WEB_PORT
         }
         gen.generate_files(templates_path, config_path, variables)
         fs.chownpath(self.app.get_install_dir(), USER_NAME, recursive=True)
@@ -64,13 +80,10 @@ class OwncloudInstaller:
 
         fs.chownpath(app_data_dir, USER_NAME, recursive=True)
 
-        config_app_dir = join(self.app.get_install_dir(), OWNCLOUD_APP_CONFIG_PATH)
+        config_app_dir = join(self.app.get_install_dir(), APP_CONFIG_PATH)
         symlink(config_data_dir, config_app_dir)
 
-        database_path = join(self.app.get_data_dir(), 'database')
-        if not isdir(database_path):
-            psql_initdb = join(self.app.get_install_dir(), 'postgresql/bin/initdb')
-            check_output(['sudo', '-H', '-u', USER_NAME, psql_initdb, database_path])
+        database_init(self.log, self.app.get_install_dir(), self.app.get_data_dir(), USER_NAME)
 
         print("setup systemd")
         self.app.add_service(SYSTEMD_POSTGRESQL)
@@ -79,7 +92,9 @@ class OwncloudInstaller:
 
         self.prepare_storage()
 
-        if not self.installed():
+        if self.installed():
+            self.upgrade()
+        else:
             self.initialize()
 
         cron = OwncloudCron(join(self.app.get_install_dir(), CRON_CMD), CRON_USER)
@@ -93,11 +108,11 @@ class OwncloudInstaller:
         oc_config.set_value('datadirectory', self.app.get_storage_dir())
         oc_config.set_value('integrity.check.disabled', 'true')
 
-        self.update_domain()
+        self.on_domain_change()
 
         fs.chownpath(self.app.get_data_dir(), USER_NAME, recursive=True)
 
-        self.app.register_web(OWNCLOUD_PORT)
+        self.app.register_web(WEB_PORT)
 
     def remove(self):
 
@@ -114,11 +129,18 @@ class OwncloudInstaller:
 
     def installed(self):
 
-        config_file = join(self.app.get_data_dir(), OWNCLOUD_DATA_CONFIG_FILE_PATH)
+        config_file = join(self.app.get_data_dir(), DATA_CONFIG_FILE_PATH)
         if not isfile(config_file):
             return False
 
         return 'installed' in open(config_file).read().strip()
+
+    def upgrade(self):
+
+        if 'require upgrade' in self.occ.run('status'):
+            self.occ.run('maintenance:mode --on')
+            self.occ.run('upgrade')
+            self.occ.run('maintenance:mode --off')
 
     def initialize(self):
 
@@ -126,52 +148,59 @@ class OwncloudInstaller:
 
         print("creating database files")
 
-        db_postgres = Database(join(self.app.get_install_dir(), PSQL_PATH), database='postgres', user=DB_USER)
-        db_postgres.execute("ALTER USER owncloud WITH PASSWORD 'owncloud';")
+        db_postgres = Database(
+            join(self.app.get_install_dir(), PSQL_PATH),
+            database='postgres', user=DB_USER, database_path=self.database_path)
+        db_postgres.execute("ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
 
-        web_setup = Setup(OWNCLOUD_PORT)
-        web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), self.app.get_storage_dir())
+        web_setup = Setup(WEB_PORT)
+        web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), self.app.get_storage_dir(), self.database_path)
 
-        occ = OCConsole(join(self.app.get_install_dir(), OCC_RUNNER_PATH))
-        occ.run('app:enable user_ldap')
+        self.occ.run('app:enable user_ldap')
 
         # https://doc.owncloud.org/server/8.0/admin_manual/configuration_server/occ_command.html
         # This is a holdover from the early days, when there was no option to create additional configurations.
         # The second, and all subsequent, configurations that you create are automatically assigned IDs:
-        occ.run('ldap:create-empty-config')
-        occ.run('ldap:create-empty-config')
+        self.occ.run('ldap:create-empty-config')
+        self.occ.run('ldap:create-empty-config')
 
-        occ.run('ldap:set-config s01 ldapHost ldap://localhost')
-        occ.run('ldap:set-config s01 ldapPort 389')
-        occ.run('ldap:set-config s01 ldapAgentName dc=syncloud,dc=org')
-        occ.run('ldap:set-config s01 ldapBase dc=syncloud,dc=org')
-        occ.run('ldap:set-config s01 ldapAgentPassword syncloud')
+        self.occ.run('ldap:set-config s01 ldapHost ldap://localhost')
+        self.occ.run('ldap:set-config s01 ldapPort 389')
+        self.occ.run('ldap:set-config s01 ldapAgentName dc=syncloud,dc=org')
+        self.occ.run('ldap:set-config s01 ldapBase dc=syncloud,dc=org')
+        self.occ.run('ldap:set-config s01 ldapAgentPassword syncloud')
 
-        occ.run('ldap:set-config s01 ldapLoginFilter "(&(|(objectclass=inetOrgPerson))(uid=%uid))"')
+        self.occ.run('ldap:set-config s01 ldapLoginFilter "(&(|(objectclass=inetOrgPerson))(uid=%uid))"')
 
-        occ.run('ldap:set-config s01 ldapUserFilterObjectclass inetOrgPerson')
-        occ.run('ldap:set-config s01 ldapBaseUsers ou=users,dc=syncloud,dc=org')
-        occ.run('ldap:set-config s01 ldapUserDisplayName cn')
-        occ.run('ldap:set-config s01 ldapExpertUsernameAttr cn')
+        self.occ.run('ldap:set-config s01 ldapUserFilterObjectclass inetOrgPerson')
+        self.occ.run('ldap:set-config s01 ldapBaseUsers ou=users,dc=syncloud,dc=org')
+        self.occ.run('ldap:set-config s01 ldapUserDisplayName cn')
+        self.occ.run('ldap:set-config s01 ldapExpertUsernameAttr cn')
 
-        occ.run('ldap:set-config s01 ldapGroupFilterObjectclass posixGroup')
-        occ.run('ldap:set-config s01 ldapGroupDisplayName cn')
-        occ.run('ldap:set-config s01 ldapBaseGroups ou=groups,dc=syncloud,dc=org')
-        occ.run('ldap:set-config s01 ldapGroupFilter "(&(|(objectclass=posixGroup)))"')
-        occ.run('ldap:set-config s01 ldapGroupMemberAssocAttr memberUid')
+        self.occ.run('ldap:set-config s01 ldapGroupFilterObjectclass posixGroup')
+        self.occ.run('ldap:set-config s01 ldapGroupDisplayName cn')
+        self.occ.run('ldap:set-config s01 ldapBaseGroups ou=groups,dc=syncloud,dc=org')
+        self.occ.run('ldap:set-config s01 ldapGroupFilter "(&(|(objectclass=posixGroup)))"')
+        self.occ.run('ldap:set-config s01 ldapGroupMemberAssocAttr memberUid')
 
-        occ.run('ldap:set-config s01 ldapTLS 0')
-        occ.run('ldap:set-config s01 turnOffCertCheck 1')
-        occ.run('ldap:set-config s01 ldapConfigurationActive 1')
+        self.occ.run('ldap:set-config s01 ldapTLS 0')
+        self.occ.run('ldap:set-config s01 turnOffCertCheck 1')
+        self.occ.run('ldap:set-config s01 ldapConfigurationActive 1')
 
         cron = OwncloudCron(join(self.app.get_install_dir(), CRON_CMD), CRON_USER)
         cron.run()
 
-        db_owncloud = Database(join(self.app.get_install_dir(), PSQL_PATH), database=DB_NAME, user=DB_USER)
-        db_owncloud.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
-        db_owncloud.execute("update oc_ldap_group_members set owncloudname = 'admin';")
+        db = Database(join(self.app.get_install_dir(), PSQL_PATH),
+                      database=DB_NAME, user=DB_USER, database_path=self.database_path)
+        db.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
+        db.execute("update oc_ldap_group_members set owncloudname = 'admin';")
 
-        occ.run('user:delete {0}'.format(INSTALL_USER))
+        self.occ.run('user:delete {0}'.format(INSTALL_USER))
+
+    def on_disk_change(self):
+        self.prepare_storage()
+        self.app.restart_service(SYSTEMD_PHP_FPM_NAME)
+        self.app.restart_service(SYSTEMD_NGINX_NAME)
 
     def prepare_storage(self):
         app_storage_dir = self.app.init_storage(USER_NAME)
@@ -181,7 +210,7 @@ class OwncloudInstaller:
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
 
-    def update_domain(self):
+    def on_domain_change(self):
         app_domain = self.app.app_domain_name()
         local_ip = check_output(["hostname", "-I"]).split(" ")[0]
         domains = ['localhost', local_ip, app_domain]
