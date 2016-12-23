@@ -60,14 +60,14 @@ def syncloud_session():
 @pytest.fixture(scope='function')
 def owncloud_session_domain(user_domain):
     session = requests.session()
-    response = session.get('http://127.0.0.1', headers={"Host": user_domain}, allow_redirects=False)
+    response = session.get('http://127.0.0.1/index.php/login', headers={"Host": user_domain}, allow_redirects=False)
     soup = BeautifulSoup(response.text, "html.parser")
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
-    response = session.post('http://127.0.0.1/index.php',
+    response = session.post('http://127.0.0.1/index.php/login',
                             headers={"Host": user_domain},
                             data={'user': DEVICE_USER, 'password': DEVICE_PASSWORD, 'requesttoken': requesttoken},
                             allow_redirects=False)
-    assert response.status_code == 302, response.text
+    assert response.status_code == 303, response.text
     return session, requesttoken
 
 
@@ -146,7 +146,7 @@ def files_scan():
 
 
 def test_visible_through_platform(auth, user_domain):
-    response = requests.get('http://127.0.0.1', headers={"Host": user_domain}, allow_redirects=False)
+    response = requests.get('http://127.0.0.1/index.php/login', headers={"Host": user_domain}, allow_redirects=False)
     assert response.status_code == 200, response.text
 
 
@@ -175,24 +175,21 @@ def test_verification(owncloud_session_domain, user_domain):
 
 def test_disk(syncloud_session, user_domain):
 
-    loop_device_cleanup(0, DEVICE_PASSWORD)
-    loop_device_cleanup(1, DEVICE_PASSWORD)
+    loop_device_cleanup('/tmp/test0', DEVICE_PASSWORD)
+    loop_device_cleanup('/tmp/test1', DEVICE_PASSWORD)
 
-    device0 = loop_device_add('ext4', 0, DEVICE_PASSWORD)
+    device0 = loop_device_add('ext4', '/tmp/test0', DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device0)
     __create_test_dir('test0', user_domain)
     __check_test_dir(owncloud_session_domain(user_domain), 'test0', user_domain)
 
-    device1 = loop_device_add('ext2', 1, DEVICE_PASSWORD)
+    device1 = loop_device_add('ext2', '/tmp/test1', DEVICE_PASSWORD)
     __activate_disk(syncloud_session, device1)
     __create_test_dir('test1', user_domain)
     __check_test_dir(owncloud_session_domain(user_domain), 'test1', user_domain)
 
     __activate_disk(syncloud_session, device0)
     __check_test_dir(owncloud_session_domain(user_domain), 'test0', user_domain)
-
-    #loop_device_cleanup(0, DEVICE_PASSWORD)
-    #loop_device_cleanup(1, DEVICE_PASSWORD)
 
 
 def __activate_disk(syncloud_session, loop_device):
