@@ -67,7 +67,7 @@ def owncloud_session_domain(user_domain):
                             headers={"Host": user_domain},
                             data={'user': DEVICE_USER, 'password': DEVICE_PASSWORD, 'requesttoken': requesttoken},
                             allow_redirects=False)
-    assert response.status_code == 302, response.text
+    assert response.status_code == 303, response.text
     return session, requesttoken
 
 
