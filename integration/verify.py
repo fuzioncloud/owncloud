@@ -42,7 +42,7 @@ def module_teardown():
     run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(platform_log_dir), password=LOGS_SSH_PASSWORD)
     owncloud_log_dir = join(LOG_DIR, 'owncloud_log')
     os.mkdir(owncloud_log_dir)
-    run_scp('root@localhost:/opt/data/owncloud/log/*.log {0}'.format(owncloud_log_dir), password=LOGS_SSH_PASSWORD)
+    run_scp('root@localhost:/opt/data/owncloud/log/*.log {0}'.format(owncloud_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
     run_scp('root@localhost:/var/log/sam.log {0}'.format(platform_log_dir), password=LOGS_SSH_PASSWORD)
 
