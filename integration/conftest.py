@@ -4,6 +4,7 @@ SYNCLOUD_INFO = 'syncloud.info'
 DEVICE_USER = 'user'
 DEVICE_PASSWORD = 'password'
 
+
 def pytest_addoption(parser):
     parser.addoption("--email", action="store")
     parser.addoption("--password", action="store")
@@ -24,10 +25,11 @@ def auth(request):
 
 @pytest.fixture(scope='module')
 def user_domain(auth):
-    email, password, domain, release, version, arch = auth
+    email, password, domain, release, _ = auth
     return 'owncloud.{0}.{1}'.format(domain, SYNCLOUD_INFO)
 
-pytest.fixture(scope='module')
+
+@pytest.fixture(scope='module')
 def app_archive_path(auth):
     _, _, _, _, app_archive = auth
     return app_archive
