@@ -33,4 +33,3 @@ def user_domain(auth):
 def app_archive_path(auth):
     _, _, _, _, app_archive = auth
     return app_archive
-
