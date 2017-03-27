@@ -109,7 +109,7 @@ def test_resource(owncloud_session_domain, user_domain):
     assert response.status_code == 200, response.text
 
 
-@pytest.mark.parametrize("megabytes", [1, 300, 3000])
+@pytest.mark.parametrize("megabytes", [1, 300])
 def test_sync(user_domain, megabytes):
 
     sync_file = 'test.file-{0}'.format(megabytes)
