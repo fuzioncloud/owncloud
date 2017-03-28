@@ -11,8 +11,8 @@ s3Secret=$6
 
 function upload_file() {
 
-  local file=$1
-  local resource="/${bucket}/apps/${file}"
+  local file=apps/$1
+  local resource="/${bucket}/${file}"
   local contentType="application/x-compressed-tar"
   local dateValue=`date -R`
   local stringToSign="PUT\n\n${contentType}\n${dateValue}\n${resource}"
