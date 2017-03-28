@@ -11,18 +11,18 @@ s3Secret=$6
 
 function upload_file() {
 
-  local file=apps/$1
-  local resource="/${bucket}/${file}"
+  local file=$1
+  local resource="/${bucket}/apps/${file}"
   local contentType="application/x-compressed-tar"
   local dateValue=`date -R`
   local stringToSign="PUT\n\n${contentType}\n${dateValue}\n${resource}"
   local signature=`echo -en ${stringToSign} | openssl sha1 -hmac ${s3Secret} -binary | base64`
-  curl -k -X PUT -T "${local_file}" \
+  curl -k -X PUT -T "${file}" \
     -H "Host: ${bucket}.s3.amazonaws.com" \
     -H "Date: ${dateValue}" \
     -H "Content-Type: ${contentType}" \
     -H "Authorization: AWS ${s3Key}:${signature}" \
-    https://${bucket}.s3.amazonaws.com/${file}
+    https://${bucket}.s3.amazonaws.com/apps/${file}
 }
 
 mkdir -p /opt/app
