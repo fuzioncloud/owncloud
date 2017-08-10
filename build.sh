@@ -3,8 +3,8 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
-if [[ -z "$1" || -z "$2" ]]; then
-    echo "usage $0 app_arch app_version"
+if [[ -z "$1" ]]; then
+    echo "usage $0 version"
     exit 1
 fi
 
@@ -14,10 +14,16 @@ export TMP=/tmp
 NAME=owncloud
 OWNCLOUD_VERSION=9.1.3
 COIN_CACHE_DIR=${DIR}/coin.cache
-ARCH=$1
-VERSION=$2
+ARCH=$(uname -m)
+VERSION=$1
 
-./coin_lib.sh
+rm -rf ${DIR}/lib
+mkdir ${DIR}/lib
+
+coin --to lib py https://pypi.python.org/packages/2.7/b/beautifulsoup4/beautifulsoup4-4.4.0-py2-none-any.whl
+coin --to lib py https://pypi.python.org/packages/2.7/r/requests/requests-2.7.0-py2.py3-none-any.whl
+coin --to lib py https://pypi.python.org/packages/source/m/massedit/massedit-0.67.1.zip
+coin --to lib py https://pypi.python.org/packages/source/s/syncloud-lib/syncloud-lib-2.tar.gz
 
 cp -r ${DIR}/src lib/syncloud-${NAME}-${VERSION}
 
@@ -25,11 +31,12 @@ rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
 mkdir -p ${BUILD_DIR}
 
-DOWNLOAD_URL=http://build.syncloud.org:8111/guestAuth/repository/download
+DOWNLOAD_URL=http://artifact.syncloud.org/3rdparty
 
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_php_${ARCH}/lastSuccessful/php-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_nginx_${ARCH}/lastSuccessful/nginx-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_postgresql_${ARCH}/lastSuccessful/postgresql-${ARCH}.tar.gz
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/php-${ARCH}.tar.gz
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
+
 coin --to ${BUILD_DIR} raw https://download.owncloud.org/community/${NAME}-${OWNCLOUD_VERSION}.tar.bz2
 
 cp -r bin ${BUILD_DIR}
