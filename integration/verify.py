@@ -47,7 +47,7 @@ def module_teardown(device_host):
 
     app_log_dir = join(LOG_DIR, 'owncloud_log')
     os.mkdir(app_log_dir)
-    run_scp('root@{0}:/opt/data/nextcloud/log/*.log {1}'.format(device_host, app_log_dir), password=LOGS_SSH_PASSWORD)
+    run_scp('root@{0}:/opt/data/owncloud/log/*.log {1}'.format(device_host, app_log_dir), password=LOGS_SSH_PASSWORD)
 
 
 
@@ -188,7 +188,7 @@ def test_disk(syncloud_session, user_domain, device_host):
 def __log_data_dir(device_host):
     run_ssh(device_host, 'ls -la /data', password=DEVICE_PASSWORD)
     run_ssh(device_host, 'ls -la /data/', password=DEVICE_PASSWORD)
-    run_ssh(device_host, 'ls -la /data/nextcloud', password=DEVICE_PASSWORD)
+    run_ssh(device_host, 'ls -la /data/owncloud', password=DEVICE_PASSWORD)
 
 
 def __activate_disk(syncloud_session, loop_device, device_host):
@@ -214,8 +214,8 @@ def __check_test_dir(owncloud_session, test_dir, user_domain, device_host):
     response = requests.get('http://{0}'.format(device_host), headers={"Host": user_domain})
     assert response.status_code == 200, BeautifulSoup(response.text, "html.parser").find('li', class_='error')
 
-    nextcloud, _ = owncloud_session
-    response = nextcloud.get('http://{0}/index.php/apps/files/ajax/list.php?dir=/'.format(device_host),
+    owncloud, _ = owncloud_session
+    response = owncloud.get('http://{0}/index.php/apps/files/ajax/list.php?dir=/'.format(device_host),
                             headers={"Host": user_domain},
                             allow_redirects=False)
     info = json.loads(response.text)
@@ -225,11 +225,11 @@ def __check_test_dir(owncloud_session, test_dir, user_domain, device_host):
 
 
 def test_phpinfo(device_host):
-    run_ssh(device_host, '/opt/app/nextcloud/bin/php-runner -i > /opt/data/nextcloud/log/phpinfo.log', password=DEVICE_PASSWORD)
+    run_ssh(device_host, '/opt/app/owncloud/bin/php-runner -i > /opt/data/owncloud/log/phpinfo.log', password=DEVICE_PASSWORD)
 
 
 def test_remove(syncloud_session, device_host):
-    response = syncloud_session.get('http://{0}/rest/remove?app_id=nextcloud'.format(device_host), allow_redirects=False)
+    response = syncloud_session.get('http://{0}/rest/remove?app_id=owncloud'.format(device_host), allow_redirects=False)
     assert response.status_code == 200, response.text
 
 
