@@ -15,24 +15,34 @@ LOG_DIR = join(DIR, 'log')
 DEVICE_USER = 'user'
 DEVICE_PASSWORD = 'password'
 log_dir = join(LOG_DIR, 'owncloud_log')
+screenshot_dir = join(DIR, 'screenshot')
 
+pytest.fixture(scope="module")
+def driver():
 
-def test_web_with_selenium(user_domain):
-
-    os.environ['PATH'] = os.environ['PATH'] + ":" + join(DIR, 'geckodriver')
-
-    caps = DesiredCapabilities.FIREFOX
-    caps["marionette"] = True
-    caps["binary"] = "/usr/bin/firefox"
-
-    profile = webdriver.FirefoxProfile()
-    profile.set_preference("webdriver.log.file", "{0}/firefox.log".format(log_dir))
-    driver = webdriver.Firefox(profile, capabilities=caps)
-
-    screenshot_dir = join(DIR, 'screenshot')
     if exists(screenshot_dir):
         shutil.rmtree(screenshot_dir)
     os.mkdir(screenshot_dir)
+
+    firefox_path = '{0}/firefox/firefox'.format(DIR)
+    caps = DesiredCapabilities.FIREFOX
+    caps["marionette"] = True
+    caps['acceptSslCerts'] = True
+
+    binary = FirefoxBinary(firefox_path)
+
+    profile = webdriver.FirefoxProfile()
+    profile.add_extension('{0}/JSErrorCollector.xpi'.format(DIR))
+    profile.set_preference('app.update.auto', False)
+    profile.set_preference('app.update.enabled', False)
+    driver = webdriver.Firefox(profile,
+                               capabilities=caps, log_path="{0}/firefox.log".format(LOG_DIR),
+                               firefox_binary=binary, executable_path=join(DIR, 'geckodriver/geckodriver'))
+    # driver.set_page_load_timeout(30)
+    # print driver.capabilities['version']
+    return driver
+
+def test_web(driver, user_domain):
 
     driver.get("http://{0}/index.php/login".format(user_domain))
     user = driver.find_element_by_id("user")
