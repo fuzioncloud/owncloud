@@ -17,7 +17,7 @@ DEVICE_PASSWORD = 'password'
 log_dir = join(LOG_DIR, 'owncloud_log')
 screenshot_dir = join(DIR, 'screenshot')
 
-pytest.fixture(scope="module")
+@pytest.fixture(scope="module")
 def driver():
 
     if exists(screenshot_dir):
