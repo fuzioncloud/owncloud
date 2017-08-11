@@ -122,7 +122,7 @@ def test_sync(user_domain, megabytes, device_host):
     print(check_output(webdav_download(DEVICE_USER, DEVICE_PASSWORD, sync_file, sync_file_download, user_domain), shell=True))
 
     assert os.path.isfile(sync_file_download)
-    run_ssh('rm /data/owncloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
+    run_ssh(device_host, 'rm /data/owncloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
     files_scan()
 
 
