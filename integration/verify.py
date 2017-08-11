@@ -50,7 +50,6 @@ def module_teardown(device_host):
     run_scp('root@{0}:/opt/data/owncloud/log/*.log {1}'.format(device_host, app_log_dir), password=LOGS_SSH_PASSWORD)
 
 
-
 @pytest.fixture(scope='function')
 def syncloud_session(device_host):
     session = requests.session()

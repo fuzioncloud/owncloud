@@ -26,16 +26,18 @@ def auth(request):
 
 @pytest.fixture(scope='module')
 def user_domain(request):
-    return 'nextcloud.{0}.{1}'.format(request.config.getoption("--domain"), SYNCLOUD_INFO)
+    return 'owncloud.{0}.{1}'.format(request.config.getoption("--domain"), SYNCLOUD_INFO)
 
 
 @pytest.fixture(scope='module')
 def app_archive_path(request):
     return request.config.getoption("--app-archive-path")
 
+
 @pytest.fixture(scope='session')
 def installer(request):
     return request.config.getoption("--installer")
+
 
 @pytest.fixture(scope='session')
 def device_host(request):
