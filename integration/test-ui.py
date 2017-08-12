@@ -54,7 +54,7 @@ def test_web(driver, user_domain):
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
     password.send_keys(Keys.RETURN)
 
-    wait_driver = WebDriverWait(driver, 10)
+    wait_driver = WebDriverWait(driver, 20)
     wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
 
     wait_driver.until(EC.element_to_be_clickable((By.ID, 'closeWizard')))
