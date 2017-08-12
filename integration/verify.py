@@ -50,7 +50,6 @@ def module_teardown(device_host):
     run_scp('root@{0}:/opt/data/owncloud/log/*.log {1}'.format(device_host, app_log_dir), password=LOGS_SSH_PASSWORD)
 
 
-
 @pytest.fixture(scope='function')
 def syncloud_session(device_host):
     session = requests.session()
@@ -62,7 +61,8 @@ def syncloud_session(device_host):
 def owncloud_session_domain(user_domain, device_host):
     session = requests.session()
     response = session.get('http://{0}/index.php/login'.format(device_host), headers={"Host": user_domain}, allow_redirects=False)
-    #print(response.text)
+    print(response.status_code)
+    print(response.text.encode('utf-8'))
     soup = BeautifulSoup(response.text, "html.parser")
     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
     response = session.post('http://{0}/index.php/login'.format(device_host),
@@ -122,8 +122,8 @@ def test_sync(user_domain, megabytes, device_host):
     print(check_output(webdav_download(DEVICE_USER, DEVICE_PASSWORD, sync_file, sync_file_download, user_domain), shell=True))
 
     assert os.path.isfile(sync_file_download)
-    run_ssh('rm /data/owncloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
-    files_scan()
+    run_ssh(device_host, 'rm /data/owncloud/{0}/files/{1}'.format(DEVICE_USER, sync_file), password=DEVICE_PASSWORD)
+    files_scan(device_host)
 
 
 def webdav_upload(user, password, file_from, file_to, user_domain):

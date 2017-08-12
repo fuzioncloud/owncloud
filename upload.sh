@@ -12,9 +12,9 @@ mkdir -p /opt/app
 SAMCMD=/opt/app/sam/bin/sam
 
 if [ "${branch}" == "master" ] || [ "${branch}" == "stable" ] ; then
-  
+
   s3cmd put ${app}-${build_number}-${arch}.tar.gz s3://${bucket}/apps/${app}-${build_number}-${arch}.tar.gz
-  
+
   if [ "${branch}" == "stable" ]; then
     branch=rc
   fi
