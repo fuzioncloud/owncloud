@@ -14,23 +14,25 @@ from owncloud.cron import OwncloudCron
 from owncloud.octools import OCConsole, OCConfig
 from owncloud.webface import Setup
 
-SYSTEMD_NGINX_NAME = 'owncloud-nginx'
-SYSTEMD_PHP_FPM_NAME = 'owncloud-php-fpm'
-SYSTEMD_POSTGRESQL = 'owncloud-postgresql'
-INSTALL_USER = 'installer'
 APP_NAME = 'owncloud'
-USER_NAME = 'owncloud'
-DB_NAME = 'owncloud'
-DB_USER = 'owncloud'
-DB_PASSWORD = 'owncloud'
+
+SYSTEMD_NGINX_NAME = '{0}-nginx'.format(APP_NAME)
+SYSTEMD_PHP_FPM_NAME = '{0}-php-fpm'.format(APP_NAME)
+SYSTEMD_POSTGRESQL = '{0}-postgresql'.format(APP_NAME)
+INSTALL_USER = 'installer'
+USER_NAME = APP_NAME
+DB_NAME = APP_NAME
+DB_USER = APP_NAME
+DB_PASSWORD = APP_NAME
 PSQL_PATH = 'postgresql/bin/psql'
 OCC_RUNNER_PATH = 'bin/occ-runner'
-OC_CONFIG_PATH = 'bin/owncloud-config'
-OWNCLOUD_LOG_PATH = 'log/owncloud.log'
-CRON_CMD = 'bin/owncloud-cron'
-CRON_USER = 'owncloud'
-APP_CONFIG_PATH = 'owncloud/config'
+OC_CONFIG_PATH = 'bin/{0}-config'.format(APP_NAME)
+OWNCLOUD_LOG_PATH = 'log/{0}.log'.format(APP_NAME)
+CRON_CMD = 'bin/{0}-cron'.format(APP_NAME)
+CRON_USER = APP_NAME
+APP_CONFIG_PATH = '{0}/config'.format(APP_NAME)
 DATA_CONFIG_FILE_PATH = 'config/config.php'
+PSQL_PORT = 5435
 WEB_PORT = 1082
 
 
@@ -48,7 +50,7 @@ def database_init(logger, app_install_dir, app_data_dir, user_name):
 
 class OwncloudInstaller:
     def __init__(self):
-        self.log = logger.get_logger('owncloud_installer')
+        self.log = logger.get_logger('{0}_installer'.format(APP_NAME))
         self.app = api.get_app_setup(APP_NAME)
         self.database_path = join(self.app.get_data_dir(), 'database')
         self.occ = OCConsole(join(self.app.get_install_dir(), OCC_RUNNER_PATH))
@@ -67,7 +69,8 @@ class OwncloudInstaller:
         variables = {
             'app_dir': self.app.get_install_dir(),
             'app_data_dir': app_data_dir,
-            'web_port': WEB_PORT
+            'web_port': WEB_PORT,
+            'db_psql_port': PSQL_PORT
         }
         gen.generate_files(templates_path, config_path, variables)
         fs.chownpath(self.app.get_install_dir(), USER_NAME, recursive=True)
@@ -106,7 +109,6 @@ class OwncloudInstaller:
         oc_config.set_value('loglevel', '2')
         oc_config.set_value('logfile', join(self.app.get_data_dir(), OWNCLOUD_LOG_PATH))
         oc_config.set_value('datadirectory', self.app.get_storage_dir())
-        oc_config.set_value('integrity.check.disabled', 'true')
 
         self.on_domain_change()
 
@@ -150,11 +152,11 @@ class OwncloudInstaller:
 
         db_postgres = Database(
             join(self.app.get_install_dir(), PSQL_PATH),
-            database='postgres', user=DB_USER, database_path=self.database_path)
+            database='postgres', user=DB_USER, database_path=self.database_path, port=PSQL_PORT)
         db_postgres.execute("ALTER USER {0} WITH PASSWORD '{1}';".format(DB_USER, DB_PASSWORD))
 
         web_setup = Setup(WEB_PORT)
-        web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), self.app.get_storage_dir(), self.database_path)
+        web_setup.finish(INSTALL_USER, unicode(uuid.uuid4().hex), self.app.get_storage_dir(), self.database_path, PSQL_PORT)
 
         self.occ.run('app:enable user_ldap')
 
@@ -191,7 +193,7 @@ class OwncloudInstaller:
         cron.run()
 
         db = Database(join(self.app.get_install_dir(), PSQL_PATH),
-                      database=DB_NAME, user=DB_USER, database_path=self.database_path)
+                      database=DB_NAME, user=DB_USER, database_path=self.database_path, port=PSQL_PORT)
         db.execute("update oc_ldap_group_mapping set owncloud_name = 'admin';")
         db.execute("update oc_ldap_group_members set owncloudname = 'admin';")
 
@@ -199,6 +201,7 @@ class OwncloudInstaller:
 
     def on_disk_change(self):
         self.prepare_storage()
+        self.occ.run('config:system:delete instanceid')
         self.app.restart_service(SYSTEMD_PHP_FPM_NAME)
         self.app.restart_service(SYSTEMD_NGINX_NAME)
 
