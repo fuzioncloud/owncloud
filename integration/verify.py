@@ -138,6 +138,10 @@ def files_scan(device_host):
     run_ssh(device_host, '/opt/app/owncloud/bin/occ-runner files:scan --all', password=DEVICE_PASSWORD)
 
 
+def test_occ(device_host):
+    run_ssh(device_host, '/opt/app/owncloud/bin/occ-runner', password=DEVICE_PASSWORD)
+
+
 def test_visible_through_platform(user_domain, device_host):
     response = requests.get('http://{0}/index.php/login'.format(device_host), headers={"Host": user_domain}, allow_redirects=False)
     assert response.status_code == 200, response.text
