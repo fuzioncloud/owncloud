@@ -13,6 +13,7 @@ export TMP=/tmp
 
 NAME=owncloud
 OWNCLOUD_VERSION=10.0.2
+OWNCLOUD_PLUGIN_USER_LDAP_VERSION=0.9.1
 COIN_CACHE_DIR=${DIR}/coin.cache
 ARCH=$(uname -m)
 VERSION=$1
@@ -36,9 +37,13 @@ DOWNLOAD_URL=http://artifact.syncloud.org/3rdparty
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/php7-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
+mv ${BUILD_DIR}/php7 ${BUILD_DIR}/php
 
 coin --to ${BUILD_DIR} raw https://download.owncloud.org/community/${NAME}-${OWNCLOUD_VERSION}.tar.bz2
-mv ${BUILD_DIR}/php7 ${BUILD_DIR}/php
+
+ls -la ${BUILD_DIR}/${NAME}/apps
+coin --to ${BUILD_DIR}/${NAME}/apps raw https://github.com/owncloud/user_ldap/releases/download/${OWNCLOUD_PLUGIN_USER_LDAP_VERSION}/user_ldap.tar.gz
+ls -la ${BUILD_DIR}/${NAME}/apps
 
 cp -r bin ${BUILD_DIR}
 cp -r config ${BUILD_DIR}/config.templates
