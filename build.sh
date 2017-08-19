@@ -12,7 +12,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=owncloud
-OWNCLOUD_VERSION=9.1.3
+OWNCLOUD_VERSION=10.0.2
 COIN_CACHE_DIR=${DIR}/coin.cache
 ARCH=$(uname -m)
 VERSION=$1
