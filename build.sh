@@ -45,6 +45,9 @@ ls -la ${BUILD_DIR}/${NAME}/apps
 coin --to ${BUILD_DIR}/${NAME}/apps raw https://github.com/owncloud/user_ldap/releases/download/${OWNCLOUD_PLUGIN_USER_LDAP_VERSION}/user_ldap.tar.gz
 ls -la ${BUILD_DIR}/${NAME}/apps
 
+#disable internal updates as they break us
+rm -r ${BUILD_DIR}/${NAME}/apps/updatenotification
+
 cp -r bin ${BUILD_DIR}
 cp -r config ${BUILD_DIR}/config.templates
 cp -r lib ${BUILD_DIR}
